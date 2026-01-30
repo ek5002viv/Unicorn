@@ -240,7 +240,7 @@ export function DashboardPage() {
                 const highestBid = highestBidByClothes[bid.clothes_id];
                 const highestAmount = highestBid?.amount ?? item.current_highest_bid ?? item.minimum_button_price;
                 const highestBidderId = highestBid?.bidderId ?? item.highest_bidder_id;
-                const isWinning = highestBidderId === profile?.id;
+                const isWinning = highestBidderId === profile?.id && bid.amount === highestAmount;
 
                 return (
                   <Card key={bid.id} hover onClick={() => navigate('/marketplace')}>

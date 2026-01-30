@@ -84,6 +84,7 @@ export function MarketplacePage() {
   const [bidding, setBidding] = useState(false);
   const [error, setError] = useState('');
   const [liveUpdateKey, setLiveUpdateKey] = useState(0);
+  const [highestBidByClothes, setHighestBidByClothes] = useState<Record<string, { amount: number; bidderId: string | null }>>({});
 
   // Load initial data (mix of real + dummy) and setup real-time updates
   useEffect(() => {
@@ -185,10 +186,36 @@ export function MarketplacePage() {
       .eq('status', 'active')
       .order('created_at', { ascending: false });
 
+    if (data && data.length > 0) {
+      const clothesIds = data.map((item) => item.id);
+      const { data: activeClothingBids } = await supabase
+        .from('clothing_bids')
+        .select('clothes_id, amount, bidder_id')
+        .in('clothes_id', clothesIds)
+        .eq('status', 'active');
+
+      if (activeClothingBids) {
+        const highestMap: Record<string, { amount: number; bidderId: string | null }> = {};
+        activeClothingBids.forEach((bid) => {
+          const existing = highestMap[bid.clothes_id];
+          if (!existing || bid.amount > existing.amount) {
+            highestMap[bid.clothes_id] = { amount: bid.amount, bidderId: bid.bidder_id };
+          }
+        });
+        setHighestBidByClothes(highestMap);
+      }
+    }
+
     // Combine with dummy data for demo purposes
     const dummyItems = generateDummyClothes(25);
     const combined = [...(data || []), ...dummyItems];
     setAllItems(combined);
+  };
+
+  const getHighestBidAmount = (item: Partial<Clothes>) => {
+    if (!item.id) return item.current_highest_bid || item.minimum_button_price || 0;
+    const highest = highestBidByClothes[item.id];
+    return highest?.amount ?? item.current_highest_bid ?? item.minimum_button_price ?? 0;
   };
 
   const handlePlaceBid = async (e: React.FormEvent) => {
@@ -200,7 +227,7 @@ export function MarketplacePage() {
 
     try {
       const bid = parseInt(bidAmount);
-      const minBid = (selectedItem.current_highest_bid || selectedItem.minimum_button_price!) + 1;
+      const minBid = getHighestBidAmount(selectedItem) + 1;
 
       if (bid < minBid) {
         throw new Error(`Bid must be at least ${minBid} buttons`);
@@ -281,6 +308,10 @@ export function MarketplacePage() {
               : item
           )
         );
+        setHighestBidByClothes(prev => ({
+          ...prev,
+          [selectedItem.id]: { amount: bid, bidderId: user.id }
+        }));
       } else if (isDummyItem && selectedItem.id) {
         setAllItems(prev =>
           prev.map(item =>
@@ -289,6 +320,10 @@ export function MarketplacePage() {
               : item
           )
         );
+        setHighestBidByClothes(prev => ({
+          ...prev,
+          [selectedItem.id]: { amount: bid, bidderId: user.id }
+        }));
       }
 
       await refreshProfile();
@@ -448,7 +483,8 @@ export function MarketplacePage() {
                       const isDummy = item.id?.startsWith('dummy-');
                       const simulatedBidders = isDummy ? getSimulatedBidders(item.id!) : [];
                       const isNewListing = new Date(item.created_at!).getTime() > Date.now() - 24 * 60 * 60 * 1000;
-                      const hasRecentBid = item.current_highest_bid && item.current_highest_bid > item.minimum_button_price!;
+                      const highestAmount = getHighestBidAmount(item);
+                      const hasRecentBid = highestAmount > (item.minimum_button_price || 0);
 
                       return (
                         <motion.div
@@ -505,7 +541,7 @@ export function MarketplacePage() {
                               <div>
                                 <p className="text-xs text-gray-500">Current Bid</p>
                                 <p className="text-lg font-bold text-blue-400">
-                                  {item.current_highest_bid || item.minimum_button_price}
+                                    {highestAmount}
                                 </p>
                               </div>
                               <div className="text-right">
@@ -576,7 +612,7 @@ export function MarketplacePage() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-400">Current Bid:</span>
                 <span className="font-bold text-blue-400">
-                  {selectedItem.current_highest_bid || selectedItem.minimum_button_price} buttons
+                  {getHighestBidAmount(selectedItem)} buttons
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
@@ -588,8 +624,8 @@ export function MarketplacePage() {
             <Input
               label="Your Bid (buttons)"
               type="number"
-              min={(selectedItem.current_highest_bid || selectedItem.minimum_button_price!) + 1}
-              placeholder={`Minimum: ${(selectedItem.current_highest_bid || selectedItem.minimum_button_price!) + 1}`}
+              min={getHighestBidAmount(selectedItem) + 1}
+              placeholder={`Minimum: ${getHighestBidAmount(selectedItem) + 1}`}
               value={bidAmount}
               onChange={(e) => setBidAmount(e.target.value)}
               required
