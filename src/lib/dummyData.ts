@@ -74,6 +74,12 @@ function getRandomDate(startHoursAgo: number, endHoursAgo: number): Date {
 }
 
 export function generateDummyClothes(count: number = 20): Partial<Clothes>[] {
+  // Check if dummy items are already stored in localStorage
+  const stored = readDummyItems();
+  if (stored.length > 0) {
+    return stored;
+  }
+
   const items: Partial<Clothes>[] = [];
 
   for (let i = 0; i < count; i++) {
@@ -103,9 +109,13 @@ export function generateDummyClothes(count: number = 20): Partial<Clothes>[] {
     });
   }
 
-  return items.sort((a, b) =>
+  const sorted = items.sort((a, b) =>
     new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime()
   );
+
+  // Persist for future loads
+  writeDummyItems(sorted);
+  return sorted;
 }
 
 export function generateDummyButtonListings(count: number = 10): Partial<ButtonResaleListing>[] {
@@ -217,6 +227,24 @@ export function getUserById(userId: string) {
 }
 
 const DEMO_BIDS_KEY = 'unicorn_demo_bids';
+const DEMO_BALANCE_KEY = 'unicorn_demo_balance';
+const DUMMY_ITEMS_KEY = 'unicorn_dummy_items';
+
+function readDummyItems(): Partial<Clothes>[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(DUMMY_ITEMS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as Partial<Clothes>[];
+  } catch {
+    return [];
+  }
+}
+
+function writeDummyItems(items: Partial<Clothes>[]) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(DUMMY_ITEMS_KEY, JSON.stringify(items));
+}
 
 function readDemoBids(): DemoBidRecord[] {
   if (typeof window === 'undefined') return [];
@@ -234,6 +262,35 @@ function writeDemoBids(bids: DemoBidRecord[]) {
   window.localStorage.setItem(DEMO_BIDS_KEY, JSON.stringify(bids));
 }
 
+function readDemoBalance(): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(DEMO_BALANCE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Record<string, number>;
+  } catch {
+    return {};
+  }
+}
+
+function writeDemoBalance(balance: Record<string, number>) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(DEMO_BALANCE_KEY, JSON.stringify(balance));
+}
+
+export function getDemoBalanceOffset(userId?: string) {
+  if (!userId) return 0;
+  const balance = readDemoBalance();
+  return balance[userId] ?? 0;
+}
+
+export function applyDemoBalanceOffset(userId: string, delta: number) {
+  const balance = readDemoBalance();
+  balance[userId] = (balance[userId] ?? 0) + delta;
+  writeDemoBalance(balance);
+  return balance[userId];
+}
+
 export function getDemoBidsForUser(userId: string) {
   return readDemoBids().filter((bid) => bid.bidder_id === userId);
 }
@@ -241,11 +298,13 @@ export function getDemoBidsForUser(userId: string) {
 export function upsertDemoBid(userId: string, item: Partial<Clothes>, amount: number) {
   if (!item.id) return;
   const bids = readDemoBids();
-  const existingIndex = bids.findIndex(
-    (bid) => bid.bidder_id === userId && bid.clothes_id === item.id
-  );
+  bids.forEach((bid) => {
+    if (bid.bidder_id === userId && bid.clothes_id === item.id) {
+      bid.status = 'outbid';
+    }
+  });
   const record: DemoBidRecord = {
-    id: existingIndex >= 0 ? bids[existingIndex].id : `demo-bid-${Date.now()}`,
+    id: `demo-bid-${Date.now()}`,
     clothes_id: item.id,
     bidder_id: userId,
     amount,
@@ -267,11 +326,7 @@ export function upsertDemoBid(userId: string, item: Partial<Clothes>, amount: nu
     },
   };
 
-  if (existingIndex >= 0) {
-    bids[existingIndex] = record;
-  } else {
-    bids.push(record);
-  }
+  bids.push(record);
 
   writeDemoBids(bids);
 }

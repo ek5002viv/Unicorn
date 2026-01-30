@@ -7,7 +7,7 @@ import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
 import { Input } from '../components/Input';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Clock, TrendingUp, Sparkles, Home } from 'lucide-react';
+import { Search, Clock, TrendingUp, Sparkles, Home, Shirt, Pants, Dress, Jacket, Shoe, Briefcase, Package } from 'lucide-react';
 import {
   generateDummyClothes,
   simulateLiveActivity,
@@ -15,7 +15,9 @@ import {
   getItemsByStatus,
   getSimulatedBidders,
   getDemoBidsForUser,
-  upsertDemoBid
+  upsertDemoBid,
+  getDemoBalanceOffset,
+  applyDemoBalanceOffset
 } from '../lib/dummyData';
 import { deductButtons, refundButtons } from '../lib/buttonService';
 
@@ -88,6 +90,8 @@ export function MarketplacePage() {
   const [liveUpdateKey, setLiveUpdateKey] = useState(0);
   const [highestBidByClothes, setHighestBidByClothes] = useState<Record<string, { amount: number; bidderId: string | null }>>({});
   const [demoBids, setDemoBids] = useState<{ clothes_id: string; amount: number }[]>([]);
+  const [demoBalanceOffset, setDemoBalanceOffset] = useState(0);
+  const displayBalance = (profile?.button_balance || 0) + demoBalanceOffset;
 
   // Load initial data (mix of real + dummy) and setup real-time updates
   useEffect(() => {
@@ -143,6 +147,7 @@ export function MarketplacePage() {
         amount: bid.amount,
       }));
       setDemoBids(bids);
+      setDemoBalanceOffset(getDemoBalanceOffset(user.id));
     }
   }, [user?.id]);
 
@@ -228,8 +233,12 @@ export function MarketplacePage() {
   const getHighestBidAmount = (item: Partial<Clothes>) => {
     if (!item.id) return item.current_highest_bid || item.minimum_button_price || 0;
     if (item.id.startsWith('dummy-')) {
-      const demo = demoBids.find((bid) => bid.clothes_id === item.id);
-      if (demo) return demo.amount;
+      const demoAmounts = demoBids
+        .filter((bid) => bid.clothes_id === item.id)
+        .map((bid) => bid.amount);
+      if (demoAmounts.length > 0) {
+        return Math.max(...demoAmounts);
+      }
     }
     const highest = highestBidByClothes[item.id];
     return highest?.amount ?? item.current_highest_bid ?? item.minimum_button_price ?? 0;
@@ -257,7 +266,7 @@ export function MarketplacePage() {
         throw new Error(`Bid must be at least ${minBid} buttons`);
       }
 
-      if (bid > profile.button_balance) {
+      if (bid > displayBalance) {
         throw new Error('Insufficient button balance');
       }
 
@@ -283,12 +292,16 @@ export function MarketplacePage() {
         }
 
         // Step 2: Insert new bid
-        const { error: insertError } = await supabase.from('clothing_bids').insert({
+        const { data: insertedBid, error: insertError } = await supabase
+          .from('clothing_bids')
+          .insert({
           clothes_id: itemId,
           bidder_id: user.id,
           amount: bid,
           status: 'active',
-        });
+          })
+          .select('id')
+          .single();
 
         if (insertError) {
           await refundButtons(
@@ -300,8 +313,17 @@ export function MarketplacePage() {
           throw insertError;
         }
 
-        // Step 3: Mark previous bid as outbid and refund previous bidder
-        if (previousBidderId && previousBidAmount > 0) {
+        if (insertedBid?.id) {
+          await supabase.from('clothing_bids')
+            .update({ status: 'outbid' })
+            .eq('clothes_id', itemId)
+            .eq('bidder_id', user.id)
+            .eq('status', 'active')
+            .neq('id', insertedBid.id);
+        }
+
+        // Step 3: Mark previous bid as outbid and refund previous bidder (only if it's a different person)
+        if (previousBidderId && previousBidAmount > 0 && previousBidderId !== user.id) {
           await supabase.from('clothing_bids')
             .update({ status: 'outbid' })
             .eq('clothes_id', itemId)
@@ -338,11 +360,9 @@ export function MarketplacePage() {
         }));
       } else if (isDummyItem && selectedItem.id) {
         upsertDemoBid(user.id, selectedItem, bid);
-        setDemoBids(prev => {
-          const next = prev.filter((entry) => entry.clothes_id !== selectedItem.id);
-          next.push({ clothes_id: selectedItem.id, amount: bid });
-          return next;
-        });
+        setDemoBids(prev => ([...prev, { clothes_id: selectedItem.id, amount: bid }]));
+        const nextOffset = applyDemoBalanceOffset(user.id, -bid);
+        setDemoBalanceOffset(nextOffset);
       }
 
       await refreshProfile();
@@ -409,7 +429,7 @@ export function MarketplacePage() {
                 </Button>
                 <div className="text-right">
                   <p className="text-xs text-gray-500">Your Balance</p>
-                  <p className="text-lg font-bold text-blue-400">{profile?.button_balance || 0}</p>
+                  <p className="text-lg font-bold text-blue-400">{displayBalance}</p>
                 </div>
               </div>
             </div>
@@ -641,7 +661,7 @@ export function MarketplacePage() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-400">Your Balance:</span>
-                <span className="font-bold text-green-400">{profile?.button_balance || 0} buttons</span>
+                <span className="font-bold text-green-400">{displayBalance} buttons</span>
               </div>
             </div>
 

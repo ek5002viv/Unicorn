@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Clothes, ClothingBid, ButtonResaleListing, ButtonResaleBid } from '../lib/supabase';
-import { getDemoBidsForUser } from '../lib/dummyData';
+import { getDemoBidsForUser, getDemoBalanceOffset } from '../lib/dummyData';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Background } from '../components/Background';
@@ -20,6 +20,20 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const activeButtonListings = myButtonListings.filter((listing) => listing.status === 'active');
   const [highestBidByClothes, setHighestBidByClothes] = useState<Record<string, { amount: number; bidderId: string | null }>>({});
+  const demoBalanceOffset = profile?.id ? getDemoBalanceOffset(profile.id) : 0;
+  const displayBalance = (profile?.button_balance || 0) + demoBalanceOffset;
+
+  const getResolvedBidStatus = (bid: ClothingBid) => {
+    if (bid.status === 'won' || bid.status === 'cancelled') return bid.status;
+    const highest = highestBidByClothes[bid.clothes_id];
+    if (!highest) return bid.status;
+    return bid.amount === highest.amount && bid.bidder_id === highest.bidderId ? 'active' : 'outbid';
+  };
+
+  const activeClothingBidsCount = myBids.filter((bid) => {
+    const status = getResolvedBidStatus(bid);
+    return status === 'active' || status === 'outbid';
+  }).length;
 
   useEffect(() => {
     loadDashboardData();
@@ -68,7 +82,7 @@ export function DashboardPage() {
 
     const [clothesRes, bidsRes, buttonListingsRes, buttonBidsRes] = await Promise.all([
       supabase.from('clothes').select('*').eq('user_id', profile.id).order('created_at', { ascending: false }),
-      supabase.from('clothing_bids').select('*').eq('bidder_id', profile.id).eq('status', 'active').order('created_at', { ascending: false }),
+      supabase.from('clothing_bids').select('*').eq('bidder_id', profile.id).order('created_at', { ascending: false }),
       supabase.from('button_resale_listings').select('*').eq('seller_id', profile.id).order('created_at', { ascending: false }),
       supabase.from('button_resale_bids').select('*').eq('bidder_id', profile.id).eq('status', 'active').order('created_at', { ascending: false }),
     ]);
@@ -83,7 +97,7 @@ export function DashboardPage() {
           clothes_id: bid.clothes_id,
           bidder_id: bid.bidder_id,
           amount: bid.amount,
-          status: 'active',
+          status: bid.status,
           created_at: bid.created_at,
         })),
       ];
@@ -113,22 +127,20 @@ export function DashboardPage() {
           .in('clothes_id', clothesIds)
           .eq('status', 'active');
 
-        if (activeClothingBids) {
-          const highestMap: Record<string, { amount: number; bidderId: string | null }> = {};
-          activeClothingBids.forEach((bid) => {
-            const existing = highestMap[bid.clothes_id];
-            if (!existing || bid.amount > existing.amount) {
-              highestMap[bid.clothes_id] = { amount: bid.amount, bidderId: bid.bidder_id };
-            }
-          });
-          demoBids.forEach((bid) => {
-            const existing = highestMap[bid.clothes_id];
-            if (!existing || bid.amount > existing.amount) {
-              highestMap[bid.clothes_id] = { amount: bid.amount, bidderId: bid.bidder_id };
-            }
-          });
-          setHighestBidByClothes(highestMap);
-        }
+        const highestMap: Record<string, { amount: number; bidderId: string | null }> = {};
+        demoBids.forEach((bid) => {
+          const existing = highestMap[bid.clothes_id];
+          if (!existing || bid.amount > existing.amount) {
+            highestMap[bid.clothes_id] = { amount: bid.amount, bidderId: bid.bidder_id };
+          }
+        });
+        (activeClothingBids || []).forEach((bid) => {
+          const existing = highestMap[bid.clothes_id];
+          if (!existing || bid.amount > existing.amount) {
+            highestMap[bid.clothes_id] = { amount: bid.amount, bidderId: bid.bidder_id };
+          }
+        });
+        setHighestBidByClothes(highestMap);
       } else {
         setHighestBidByClothes({});
       }
@@ -180,7 +192,7 @@ export function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Button Balance</p>
-                <p className="text-2xl font-bold text-white">{profile?.button_balance || 0}</p>
+                <p className="text-2xl font-bold text-white">{displayBalance}</p>
               </div>
             </div>
           </Card>
@@ -204,8 +216,8 @@ export function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Active Bids & Sales</p>
-                <p className="text-2xl font-bold text-white">{myBids.length + myButtonBids.length + activeButtonListings.length}</p>
-                <p className="text-xs text-gray-500">{myBids.length} clothing bids, {myButtonBids.length} button bids, {activeButtonListings.length} button sales</p>
+                <p className="text-2xl font-bold text-white">{activeClothingBidsCount + myButtonBids.length + activeButtonListings.length}</p>
+                <p className="text-xs text-gray-500">{activeClothingBidsCount} clothing bids, {myButtonBids.length} button bids, {activeButtonListings.length} button sales</p>
               </div>
             </div>
           </Card>
@@ -246,18 +258,18 @@ export function DashboardPage() {
           </Button>
         </div>
 
-        {/* Active Clothing Bids Section */}
+        {/* Clothing Bids Section */}
         {myBids.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-white">Active Clothing Bids</h2>
+                <h2 className="text-2xl font-bold text-white">Your Clothing Bids</h2>
                 <div className="flex items-center gap-2 px-3 py-1 bg-green-600/20 rounded-full">
                   <Zap size={14} className="text-green-400" />
                   <span className="text-xs text-green-400 font-medium">LIVE</span>
                 </div>
               </div>
-              <span className="text-sm text-gray-400">{myBids.length} bid{myBids.length !== 1 ? 's' : ''} active</span>
+              <span className="text-sm text-gray-400">{myBids.length} bid{myBids.length !== 1 ? 's' : ''} total</span>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {myBids.map((bid) => {
@@ -267,7 +279,17 @@ export function DashboardPage() {
                 const highestBid = highestBidByClothes[bid.clothes_id];
                 const highestAmount = highestBid?.amount ?? item.current_highest_bid ?? item.minimum_button_price;
                 const highestBidderId = highestBid?.bidderId ?? item.highest_bidder_id;
-                const isWinning = highestBidderId === profile?.id && bid.amount === highestAmount;
+                const isWinning = highestBidderId === bid.bidder_id && bid.amount === highestAmount;
+                const resolvedStatus = getResolvedBidStatus(bid);
+                const displayStatus = resolvedStatus === 'won'
+                  ? '🏆 Won'
+                  : resolvedStatus === 'cancelled'
+                    ? 'Cancelled'
+                    : resolvedStatus === 'outbid'
+                      ? '⚠️ Outbid'
+                      : isWinning
+                        ? '🎉 You\'re Winning!'
+                        : '⚠️ Outbid';
 
                 return (
                   <Card key={bid.id} hover onClick={() => navigate('/marketplace')}>
@@ -297,11 +319,13 @@ export function DashboardPage() {
                         </div>
                       </div>
                       <div className={`px-3 py-2 rounded-lg text-center text-sm font-medium ${
-                        isWinning
+                        displayStatus === '🎉 You\'re Winning!' || displayStatus === '🏆 Won'
                           ? 'bg-green-600/20 text-green-400'
-                          : 'bg-red-600/20 text-red-400'
+                          : displayStatus === 'Cancelled'
+                            ? 'bg-gray-600/20 text-gray-400'
+                            : 'bg-red-600/20 text-red-400'
                       }`}>
-                        {isWinning ? '🎉 You\'re Winning!' : '⚠️ Outbid'}
+                        {displayStatus}
                       </div>
                     </div>
                   </Card>
