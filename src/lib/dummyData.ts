@@ -32,6 +32,12 @@ export const CLOTHING_ITEMS = [
   { title: 'Empire Waist Dress', category: 'Dresses', keywords: ['empire', 'flowing', 'romantic'] },
   { title: 'Halter Dress', category: 'Dresses', keywords: ['halter', 'summer', 'backless'] },
   { title: 'Off-Shoulder Dress', category: 'Dresses', keywords: ['off-shoulder', 'trendy', 'feminine'] },
+  { title: 'Silk Blouse', category: 'Tops', keywords: ['silk', 'elegant', 'work'] },
+  { title: 'Crop Top', category: 'Tops', keywords: ['crop', 'casual', 'summer'] },
+  { title: 'Tank Top', category: 'Tops', keywords: ['tank', 'basic', 'layering'] },
+  { title: 'High-Waisted Jeans', category: 'Bottoms', keywords: ['jeans', 'denim', 'casual'] },
+  { title: 'Leather Jacket', category: 'Outerwear', keywords: ['leather', 'edgy', 'cool'] },
+  { title: 'Designer Handbag', category: 'Accessories', keywords: ['bag', 'designer', 'luxury'] },
 ];
 
 export const FASHION_IMAGES = [

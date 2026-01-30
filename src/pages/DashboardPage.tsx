@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase, Clothes, ClothingBid, ButtonResaleListing } from '../lib/supabase';
+import { supabase, Clothes, ClothingBid, ButtonResaleListing, ButtonResaleBid } from '../lib/supabase';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
-import { Coins, ShoppingBag, Upload, TrendingUp, LogOut, Activity } from 'lucide-react';
+import { Coins, ShoppingBag, Upload, TrendingUp, LogOut, Activity, Zap } from 'lucide-react';
 
 export function DashboardPage() {
   const { profile, signOut, refreshProfile } = useAuth();
@@ -15,19 +15,59 @@ export function DashboardPage() {
   const [myBids, setMyBids] = useState<ClothingBid[]>([]);
   const [biddedClothes, setBiddedClothes] = useState<Clothes[]>([]);
   const [myButtonListings, setMyButtonListings] = useState<ButtonResaleListing[]>([]);
+  const [myButtonBids, setMyButtonBids] = useState<ButtonResaleBid[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+
+    if (!profile) return;
+
+    const clothingBidsChannel = supabase
+      .channel('clothing_bids_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'clothing_bids',
+          filter: `bidder_id=eq.${profile.id}`,
+        },
+        () => {
+          loadDashboardData();
+        }
+      )
+      .subscribe();
+
+    const clothesChannel = supabase
+      .channel('clothes_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'clothes',
+        },
+        () => {
+          loadDashboardData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(clothingBidsChannel);
+      supabase.removeChannel(clothesChannel);
+    };
+  }, [profile]);
 
   const loadDashboardData = async () => {
     if (!profile) return;
 
-    const [clothesRes, bidsRes, buttonListingsRes] = await Promise.all([
+    const [clothesRes, bidsRes, buttonListingsRes, buttonBidsRes] = await Promise.all([
       supabase.from('clothes').select('*').eq('user_id', profile.id).order('created_at', { ascending: false }),
       supabase.from('clothing_bids').select('*').eq('bidder_id', profile.id).eq('status', 'active').order('created_at', { ascending: false }),
       supabase.from('button_resale_listings').select('*').eq('seller_id', profile.id).order('created_at', { ascending: false }),
+      supabase.from('button_resale_bids').select('*').eq('bidder_id', profile.id).eq('status', 'active').order('created_at', { ascending: false }),
     ]);
 
     if (clothesRes.data) setMyClothes(clothesRes.data);
@@ -46,6 +86,7 @@ export function DashboardPage() {
       }
     }
     if (buttonListingsRes.data) setMyButtonListings(buttonListingsRes.data);
+    if (buttonBidsRes.data) setMyButtonBids(buttonBidsRes.data);
 
     await refreshProfile();
     setLoading(false);
@@ -115,7 +156,8 @@ export function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Active Bids</p>
-                <p className="text-2xl font-bold text-white">{myBids.length}</p>
+                <p className="text-2xl font-bold text-white">{myBids.length + myButtonBids.length}</p>
+                <p className="text-xs text-gray-500">{myBids.length} clothing, {myButtonBids.length} buttons</p>
               </div>
             </div>
           </Card>
@@ -156,11 +198,17 @@ export function DashboardPage() {
           </Button>
         </div>
 
-        {/* Active Bids Section */}
+        {/* Active Clothing Bids Section */}
         {myBids.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white">Active Bids</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-white">Active Clothing Bids</h2>
+                <div className="flex items-center gap-2 px-3 py-1 bg-green-600/20 rounded-full">
+                  <Zap size={14} className="text-green-400" />
+                  <span className="text-xs text-green-400 font-medium">LIVE</span>
+                </div>
+              </div>
               <span className="text-sm text-gray-400">{myBids.length} bid{myBids.length !== 1 ? 's' : ''} active</span>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -214,10 +262,14 @@ export function DashboardPage() {
 
         <div className="grid lg:grid-cols-2 gap-8">
           <div>
-            <h2 className="text-xl font-bold text-white mb-4">My Listings</h2>
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-white">My Clothing Listings</h2>
+              <p className="text-xs text-gray-500">Clothes you're selling for buttons</p>
+            </div>
             {myClothes.length === 0 ? (
               <Card>
                 <p className="text-gray-400 text-center">No listings yet</p>
+                <p className="text-sm text-gray-500 text-center mt-2">List clothes to earn buttons</p>
               </Card>
             ) : (
               <div className="space-y-4">
@@ -247,10 +299,14 @@ export function DashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-white mb-4">Button Resale Listings</h2>
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-white">My Button Sales</h2>
+              <p className="text-xs text-gray-500">Buttons you're selling for USD</p>
+            </div>
             {myButtonListings.length === 0 ? (
               <Card>
                 <p className="text-gray-400 text-center">No button listings yet</p>
+                <p className="text-sm text-gray-500 text-center mt-2">Sell buttons to convert them to cash</p>
               </Card>
             ) : (
               <div className="space-y-4">

@@ -46,14 +46,51 @@ export function MarketplacePage() {
   const [error, setError] = useState('');
   const [liveUpdateKey, setLiveUpdateKey] = useState(0);
 
-  // Load initial data (mix of real + dummy)
+  // Load initial data (mix of real + dummy) and setup real-time updates
   useEffect(() => {
     loadMarketplace();
-    // Simulate live activity every 10 seconds
+
+    // Subscribe to real-time changes on clothes table
+    const clothesChannel = supabase
+      .channel('clothes_marketplace')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'clothes',
+        },
+        (payload) => {
+          setAllItems(prev => {
+            const updated = prev.map(item =>
+              item.id === payload.new.id ? { ...item, ...payload.new } : item
+            );
+            return updated;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'clothes',
+        },
+        (payload) => {
+          setAllItems(prev => [payload.new as Clothes, ...prev]);
+        }
+      )
+      .subscribe();
+
+    // Simulate live activity for dummy items every 15 seconds
     const interval = setInterval(() => {
       setLiveUpdateKey(prev => prev + 1);
-    }, 10000);
-    return () => clearInterval(interval);
+    }, 15000);
+
+    return () => {
+      supabase.removeChannel(clothesChannel);
+      clearInterval(interval);
+    };
   }, []);
 
   // Apply filters and categories
@@ -83,10 +120,15 @@ export function MarketplacePage() {
     setDisplayItems(filtered);
   }, [allItems, selectedCategory, selectedFilter, searchQuery]);
 
-  // Simulate live activity
+  // Simulate live activity for dummy items only
   useEffect(() => {
     if (liveUpdateKey > 0) {
-      setAllItems(prev => simulateLiveActivity(prev));
+      setAllItems(prev => {
+        const dummyItems = prev.filter(item => item.id?.startsWith('dummy-'));
+        const realItems = prev.filter(item => !item.id?.startsWith('dummy-'));
+        const updatedDummy = simulateLiveActivity(dummyItems);
+        return [...realItems, ...updatedDummy];
+      });
     }
   }, [liveUpdateKey]);
 
@@ -221,12 +263,18 @@ export function MarketplacePage() {
           <div className="max-w-[1400px] mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <button
-                  onClick={() => navigate('/')}
-                  className="text-2xl font-bold text-white hover:text-blue-400 transition-colors"
-                >
-                  Fashion Buttons
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => navigate('/')}
+                    className="text-2xl font-bold text-white hover:text-blue-400 transition-colors"
+                  >
+                    Fashion Buttons
+                  </button>
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-green-600/20 rounded-full animate-pulse">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span className="text-xs text-green-400 font-medium">LIVE</span>
+                  </div>
+                </div>
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
                   <input
