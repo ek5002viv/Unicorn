@@ -159,25 +159,21 @@ export function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center relative">
+      <div className="min-h-screen flex items-center justify-center relative bg-white">
         <Background />
-        <div className="text-white relative z-10">Loading...</div>
+        <div className="text-text-primary relative z-10">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 relative">
+    <div className="min-h-screen p-4 relative bg-white">
       <Background />
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="max-w-[1100px] mx-auto relative z-10">
         <div className="flex items-center justify-between mb-8">
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-3xl font-bold text-white"
-          >
+          <h1 className="text-3xl font-semibold text-text-primary">
             Dashboard
-          </motion.h1>
+          </h1>
           <Button variant="ghost" onClick={handleLogout}>
             <LogOut size={20} className="mr-2" />
             Logout
@@ -187,49 +183,49 @@ export function DashboardPage() {
         <div className="grid md:grid-cols-4 gap-4 mb-8">
           <Card>
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-600 rounded-lg">
+              <div className="p-3 bg-brand-pink rounded-lg">
                 <Coins size={24} className="text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Button Balance</p>
-                <p className="text-2xl font-bold text-white">{displayBalance}</p>
+                <p className="text-sm text-text-secondary">Button balance</p>
+                <p className="text-2xl font-semibold text-text-primary">{displayBalance}</p>
               </div>
             </div>
           </Card>
 
           <Card>
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-600 rounded-lg">
+              <div className="p-3 bg-brand-pink rounded-lg">
                 <TrendingUp size={24} className="text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Total Earned</p>
-                <p className="text-2xl font-bold text-white">{profile?.total_buttons_earned || 0}</p>
+                <p className="text-sm text-text-secondary">Total earned</p>
+                <p className="text-2xl font-semibold text-text-primary">{profile?.total_buttons_earned || 0}</p>
               </div>
             </div>
           </Card>
 
           <Card>
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-600 rounded-lg">
+              <div className="p-3 bg-brand-pink rounded-lg">
                 <ShoppingBag size={24} className="text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Active Bids & Sales</p>
-                <p className="text-2xl font-bold text-white">{activeClothingBidsCount + myButtonBids.length + activeButtonListings.length}</p>
-                <p className="text-xs text-gray-500">{activeClothingBidsCount} clothing bids, {myButtonBids.length} button bids, {activeButtonListings.length} button sales</p>
+                <p className="text-sm text-text-secondary">Active bids & sales</p>
+                <p className="text-2xl font-semibold text-text-primary">{activeClothingBidsCount + myButtonBids.length + activeButtonListings.length}</p>
+                <p className="text-xs text-text-secondary">{activeClothingBidsCount} clothing bids, {myButtonBids.length} button bids, {activeButtonListings.length} button sales</p>
               </div>
             </div>
           </Card>
 
           <Card>
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-orange-600 rounded-lg">
+              <div className="p-3 bg-brand-pink rounded-lg">
                 <Upload size={24} className="text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Listed Items</p>
-                <p className="text-2xl font-bold text-white">{myClothes.length}</p>
+                <p className="text-sm text-text-secondary">Listed items</p>
+                <p className="text-2xl font-semibold text-text-primary">{myClothes.length}</p>
               </div>
             </div>
           </Card>
@@ -238,23 +234,23 @@ export function DashboardPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Button onClick={() => navigate('/marketplace')} className="h-20">
             <ShoppingBag className="mr-2" />
-            Browse Marketplace
+            Browse marketplace
           </Button>
           <Button onClick={() => navigate('/list-clothing')} variant="secondary" className="h-20">
             <Upload className="mr-2" />
-            List Clothing
+            List clothing
           </Button>
           <Button onClick={() => navigate('/buy-buttons')} variant="secondary" className="h-20">
             <Coins className="mr-2" />
-            Buy Buttons
+            Buy buttons
           </Button>
           <Button onClick={() => navigate('/sell-buttons')} variant="secondary" className="h-20">
             <TrendingUp className="mr-2" />
-            Sell Buttons
+            Sell buttons
           </Button>
           <Button onClick={() => navigate('/activity')} variant="secondary" className="h-20">
             <Activity className="mr-2" />
-            Recent Activity
+            Recent activity
           </Button>
         </div>
 
@@ -263,13 +259,13 @@ export function DashboardPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-white">Your Clothing Bids</h2>
-                <div className="flex items-center gap-2 px-3 py-1 bg-green-600/20 rounded-full">
-                  <Zap size={14} className="text-green-400" />
-                  <span className="text-xs text-green-400 font-medium">LIVE</span>
+                <h2 className="text-2xl font-semibold text-text-primary">Your clothing bids</h2>
+                <div className="flex items-center gap-2 px-3 py-1 bg-brand-pink/20 rounded-full">
+                  <Zap size={14} className="text-brand-pink" />
+                  <span className="text-xs text-brand-pink font-medium">LIVE</span>
                 </div>
               </div>
-              <span className="text-sm text-gray-400">{myBids.length} bid{myBids.length !== 1 ? 's' : ''} total</span>
+              <span className="text-sm text-text-secondary">{myBids.length} bid{myBids.length !== 1 ? 's' : ''} total</span>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {myBids.map((bid) => {
@@ -288,7 +284,7 @@ export function DashboardPage() {
                     : resolvedStatus === 'outbid'
                       ? '⚠️ Outbid'
                       : isWinning
-                        ? '🎉 You\'re Winning!'
+                        ? '🎉 You\'re winning!'
                         : '⚠️ Outbid';
 
                 return (
@@ -305,25 +301,25 @@ export function DashboardPage() {
                         />
                       )}
                       <div>
-                        <h3 className="font-semibold text-white">{item.title}</h3>
-                        <p className="text-sm text-gray-400">{item.category}</p>
+                        <h3 className="font-semibold text-text-primary">{item.title}</h3>
+                        <p className="text-sm text-text-secondary">{item.category}</p>
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-gray-500">Your Bid</p>
-                          <p className="text-lg font-bold" style={{ color: '#F5C542' }}>{bid.amount}</p>
+                          <p className="text-xs text-text-secondary">Your bid</p>
+                          <p className="text-lg font-semibold text-brand-pink">{bid.amount}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs text-gray-500">Highest</p>
-                          <p className="text-lg font-bold text-white">{highestAmount}</p>
+                          <p className="text-xs text-text-secondary">Highest</p>
+                          <p className="text-lg font-semibold text-text-primary">{highestAmount}</p>
                         </div>
                       </div>
                       <div className={`px-3 py-2 rounded-lg text-center text-sm font-medium ${
-                        displayStatus === '🎉 You\'re Winning!' || displayStatus === '🏆 Won'
-                          ? 'bg-green-600/20 text-green-400'
+                        displayStatus === '🎉 You\'re winning!' || displayStatus === '🏆 Won'
+                          ? 'bg-green-50 text-green-600'
                           : displayStatus === 'Cancelled'
-                            ? 'bg-gray-600/20 text-gray-400'
-                            : 'bg-red-600/20 text-red-400'
+                            ? 'bg-gray-100 text-gray-600'
+                            : 'bg-red-50 text-red-600'
                       }`}>
                         {displayStatus}
                       </div>
@@ -338,13 +334,13 @@ export function DashboardPage() {
         <div className="grid lg:grid-cols-2 gap-8">
           <div>
             <div className="mb-4">
-              <h2 className="text-xl font-bold text-white">My Clothing Listings</h2>
-              <p className="text-xs text-gray-500">Clothes you're selling for buttons</p>
+              <h2 className="text-xl font-semibold text-text-primary">My clothing listings</h2>
+              <p className="text-xs text-text-secondary">Clothes you're selling for buttons</p>
             </div>
             {myClothes.length === 0 ? (
               <Card>
-                <p className="text-gray-400 text-center">No listings yet</p>
-                <p className="text-sm text-gray-500 text-center mt-2">List clothes to earn buttons</p>
+                <p className="text-text-secondary text-center">No listings yet</p>
+                <p className="text-sm text-text-secondary text-center mt-2">List clothes to earn buttons</p>
               </Card>
             ) : (
               <div className="space-y-4">
@@ -352,16 +348,16 @@ export function DashboardPage() {
                   <Card key={item.id} hover>
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-semibold text-white">{item.title}</h3>
-                        <p className="text-sm text-gray-400">{item.category}</p>
+                        <h3 className="font-semibold text-text-primary">{item.title}</h3>
+                        <p className="text-sm text-text-secondary">{item.category}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-gray-400">Current Bid</p>
-                        <p className="font-bold text-blue-400">{item.current_highest_bid || item.minimum_button_price} buttons</p>
+                        <p className="text-sm text-text-secondary">Current bid</p>
+                        <p className="font-semibold text-brand-pink">{item.current_highest_bid || item.minimum_button_price} buttons</p>
                         <span className={`text-xs px-2 py-1 rounded ${
-                          item.status === 'active' ? 'bg-green-500/20 text-green-400' :
-                          item.status === 'sold' ? 'bg-blue-500/20 text-blue-400' :
-                          'bg-gray-500/20 text-gray-400'
+                          item.status === 'active' ? 'bg-green-50 text-green-600' :
+                          item.status === 'sold' ? 'bg-brand-pink/20 text-brand-pink' :
+                          'bg-gray-100 text-gray-600'
                         }`}>
                           {item.status}
                         </span>
@@ -375,13 +371,13 @@ export function DashboardPage() {
 
           <div>
             <div className="mb-4">
-              <h2 className="text-xl font-bold text-white">My Button Sales</h2>
-              <p className="text-xs text-gray-500">Buttons you're selling for USD</p>
+              <h2 className="text-xl font-semibold text-text-primary">My button sales</h2>
+              <p className="text-xs text-text-secondary">Buttons you're selling for USD</p>
             </div>
             {myButtonListings.length === 0 ? (
               <Card>
-                <p className="text-gray-400 text-center">No button listings yet</p>
-                <p className="text-sm text-gray-500 text-center mt-2">Sell buttons to convert them to cash</p>
+                <p className="text-text-secondary text-center">No button listings yet</p>
+                <p className="text-sm text-text-secondary text-center mt-2">Sell buttons to convert them to cash</p>
               </Card>
             ) : (
               <div className="space-y-4">
@@ -389,16 +385,16 @@ export function DashboardPage() {
                   <Card key={listing.id} hover>
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-semibold text-white">{listing.button_amount} Buttons</h3>
-                        <p className="text-sm text-gray-400">Min: ${listing.minimum_price_usd}</p>
+                        <h3 className="font-semibold text-text-primary">{listing.button_amount} buttons</h3>
+                        <p className="text-sm text-text-secondary">Min: ${listing.minimum_price_usd}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-gray-400">Current Bid</p>
-                        <p className="font-bold text-green-400">${listing.current_highest_bid_usd || listing.minimum_price_usd}</p>
+                        <p className="text-sm text-text-secondary">Current bid</p>
+                        <p className="font-semibold text-green-600">${listing.current_highest_bid_usd || listing.minimum_price_usd}</p>
                         <span className={`text-xs px-2 py-1 rounded ${
-                          listing.status === 'active' ? 'bg-green-500/20 text-green-400' :
-                          listing.status === 'sold' ? 'bg-blue-500/20 text-blue-400' :
-                          'bg-gray-500/20 text-gray-400'
+                          listing.status === 'active' ? 'bg-green-50 text-green-600' :
+                          listing.status === 'sold' ? 'bg-brand-pink/20 text-brand-pink' :
+                          'bg-gray-100 text-gray-600'
                         }`}>
                           {listing.status}
                         </span>

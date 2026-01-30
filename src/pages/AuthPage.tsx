@@ -36,20 +36,16 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative">
+    <div className="min-h-screen flex items-center justify-center p-4 relative bg-white">
       <Background />
       <div className="w-full max-w-md relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-pink rounded-full mb-4">
             <Shirt size={32} className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Fashion Buttons</h1>
-          <p className="text-gray-400">Trade clothes, not cash</p>
-        </motion.div>
+          <h1 className="text-3xl font-semibold text-text-primary mb-2">Fashion Buttons</h1>
+          <p className="text-text-secondary">Trade clothes, not cash</p>
+        </div>
 
         <Card>
           <div className="flex gap-2 mb-6">
@@ -65,7 +61,7 @@ export function AuthPage() {
               onClick={() => setIsLogin(false)}
               className="flex-1"
             >
-              Sign Up
+              Sign up
             </Button>
           </div>
 
@@ -89,13 +85,9 @@ export function AuthPage() {
             />
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm"
-              >
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                 {error}
-              </motion.div>
+              </div>
             )}
 
             <Button
@@ -103,18 +95,14 @@ export function AuthPage() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
+              {loading ? 'Please wait...' : isLogin ? 'Sign in' : 'Create account'}
             </Button>
           </form>
 
           {!isLogin && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-4 text-sm text-gray-400 text-center"
-            >
+            <p className="mt-4 text-sm text-text-secondary text-center">
               After signup, you'll be guided through onboarding
-            </motion.p>
+            </p>
           )}
         </Card>
       </div>

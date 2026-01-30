@@ -15,13 +15,13 @@ export function Button({
   onClick,
   type,
 }: ButtonProps) {
-  const baseStyles = 'font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variants = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-    secondary: 'bg-gray-700 hover:bg-gray-600 text-white',
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
-    ghost: 'bg-transparent hover:bg-gray-800 text-gray-300',
+    primary: 'bg-brand-pink hover:bg-brand-pink-hover text-white',
+    secondary: 'bg-white hover:bg-brand-grey-light text-text-primary border border-gray-300',
+    danger: 'bg-red-500 hover:bg-red-600 text-white',
+    ghost: 'bg-transparent hover:bg-brand-grey-light text-text-primary',
   };
 
   const sizes = {
@@ -31,15 +31,13 @@ export function Button({
   };
 
   return (
-    <motion.button
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
+    <button
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={disabled}
       onClick={onClick}
       type={type}
     >
       {children}
-    </motion.button>
+    </button>
   );
 }

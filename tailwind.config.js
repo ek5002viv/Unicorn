@@ -4,19 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 99Dresses strict color scheme
         'brand': {
-          'bg': '#2B2B2B',           // Primary background (charcoal black)
-          'header': '#4B2D4F',        // Header background (deep purple)
-          'card': '#FFFFFF',          // Card background (white)
-          'purple': '#7A3B8F',        // Primary accent (purple buttons)
-          'gold': '#F5C542',          // Secondary accent (price tags/gold)
+          'pink': '#F4A6B8',
+          'pink-light': '#F7B6C8',
+          'pink-hover': '#E895A8',
+          'grey-light': '#F2F2F2',
         },
         'text': {
-          'heading': '#FFFFFF',       // Headings
-          'body': '#CFCFCF',          // Body text on dark bg
-          'card': '#333333',          // Text on white cards
+          'primary': '#333333',
+          'secondary': '#9B9B9B',
         },
+      },
+      fontFamily: {
+        sans: ['Helvetica Neue', 'Arial', 'sans-serif'],
       },
     },
   },

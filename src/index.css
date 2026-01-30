@@ -4,13 +4,14 @@
 
 @layer base {
   * {
-    @apply border-gray-700;
+    @apply border-gray-300;
   }
 
   body {
     @apply antialiased;
-    background-color: #2B2B2B;
-    color: #CFCFCF;
+    background-color: #FFFFFF;
+    color: #333333;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
   }
 
   html {
@@ -18,6 +19,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    color: #FFFFFF;
+    color: #333333;
+    font-weight: 600;
   }
 }

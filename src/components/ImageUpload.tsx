@@ -68,17 +68,14 @@ export function ImageUpload({ onImagesChange, maxImages = 5, existingImages = []
   return (
     <div className="space-y-4">
       {/* Drop Zone */}
-      <motion.div
+      <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        animate={{
-          borderColor: isDragging ? '#7A3B8F' : '#4B5563',
-          backgroundColor: isDragging ? 'rgba(122, 59, 143, 0.05)' : 'transparent',
-        }}
         className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all"
         style={{
-          borderColor: isDragging ? '#7A3B8F' : '#4B5563',
+          borderColor: isDragging ? '#F4A6B8' : '#D1D5DB',
+          backgroundColor: isDragging ? 'rgba(244, 166, 184, 0.05)' : 'transparent',
         }}
       >
         <input
@@ -92,88 +89,64 @@ export function ImageUpload({ onImagesChange, maxImages = 5, existingImages = []
         />
 
         <label htmlFor="file-upload" className="cursor-pointer">
-          <motion.div
-            animate={{
-              scale: isDragging ? 1.05 : 1,
-            }}
-            className="flex flex-col items-center gap-3"
-          >
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: '#7A3B8F' }}
-            >
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center bg-brand-pink">
               <Upload size={32} className="text-white" />
             </div>
 
             <div>
-              <p className="text-lg font-semibold text-white mb-1">
+              <p className="text-lg font-semibold text-text-primary mb-1">
                 {images.length >= maxImages
                   ? `Maximum ${maxImages} images reached`
                   : 'Drop images here or click to upload'}
               </p>
-              <p className="text-sm text-text-body">
+              <p className="text-sm text-text-secondary">
                 {images.length >= maxImages
                   ? 'Remove an image to upload more'
                   : `Upload up to ${maxImages} images (JPEG, PNG, GIF)`}
               </p>
             </div>
-          </motion.div>
+          </div>
         </label>
-      </motion.div>
+      </div>
 
       {/* Image Previews */}
-      <AnimatePresence mode="popLayout">
-        {images.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
-          >
-            {images.map((image, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="relative aspect-square rounded-lg overflow-hidden group"
-                style={{ backgroundColor: '#FFFFFF' }}
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {images.map((image, index) => (
+            <div
+              key={index}
+              className="relative aspect-square rounded-lg overflow-hidden group bg-brand-grey-light"
+            >
+              <img
+                src={image}
+                alt={`Preview ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+
+              {/* Remove Button */}
+              <button
+                className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => removeImage(index)}
+                type="button"
               >
-                <img
-                  src={image}
-                  alt={`Preview ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
+                <X size={16} />
+              </button>
 
-                {/* Remove Button */}
-                <motion.button
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => removeImage(index)}
-                  type="button"
-                >
-                  <X size={16} />
-                </motion.button>
-
-                {/* Image Number */}
-                <div className="absolute bottom-2 left-2 w-6 h-6 rounded-full flex items-center justify-center bg-black/60 text-white text-xs font-bold">
-                  {index + 1}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {/* Image Number */}
+              <div className="absolute bottom-2 left-2 w-6 h-6 rounded-full flex items-center justify-center bg-black/60 text-white text-xs font-bold">
+                {index + 1}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Info */}
       {images.length > 0 && (
-        <div
-          className="flex items-center gap-2 p-3 rounded-lg text-sm"
-          style={{ backgroundColor: 'rgba(122, 59, 143, 0.1)', border: '1px solid #7A3B8F' }}
-        >
-          <ImageIcon size={16} style={{ color: '#7A3B8F' }} />
-          <span style={{ color: '#7A3B8F' }}>
+        <div className="flex items-center gap-2 p-3 rounded-lg text-sm bg-brand-pink/10 border border-brand-pink/20">
+          <ImageIcon size={16} className="text-brand-pink" />
+          <span className="text-brand-pink">
             {images.length} of {maxImages} images uploaded
           </span>
         </div>

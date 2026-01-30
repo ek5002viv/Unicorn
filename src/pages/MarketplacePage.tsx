@@ -390,35 +390,35 @@ export function MarketplacePage() {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative bg-white">
       <Background />
 
       <div className="relative z-10">
         {/* Header Bar - 99Dresses Style */}
-        <div className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-20">
-          <div className="max-w-[1400px] mx-auto px-4 py-4">
+        <div className="border-b border-gray-200 bg-white sticky top-0 z-20">
+          <div className="max-w-[1100px] mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => navigate('/')}
-                    className="text-2xl font-bold text-white hover:text-blue-400 transition-colors"
+                    className="text-2xl font-semibold text-text-primary hover:text-brand-pink transition-colors"
                   >
                     Fashion Buttons
                   </button>
-                  <div className="flex items-center gap-1.5 px-2 py-1 bg-green-600/20 rounded-full animate-pulse">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <span className="text-xs text-green-400 font-medium">LIVE</span>
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-brand-pink/20 rounded-full">
+                    <div className="w-2 h-2 bg-brand-pink rounded-full"></div>
+                    <span className="text-xs text-brand-pink font-medium">LIVE</span>
                   </div>
                 </div>
                 <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" size={18} />
                   <input
                     type="text"
                     placeholder="Search items..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-brand-pink"
                   />
                 </div>
               </div>
@@ -428,22 +428,22 @@ export function MarketplacePage() {
                   Home
                 </Button>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500">Your Balance</p>
-                  <p className="text-lg font-bold text-blue-400">{displayBalance}</p>
+                  <p className="text-xs text-text-secondary">Your balance</p>
+                  <p className="text-lg font-semibold text-brand-pink">{displayBalance}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-[1400px] mx-auto px-4 py-6">
+        <div className="max-w-[1100px] mx-auto px-4 py-6">
           <div className="flex gap-6">
             {/* Left Sidebar - 99Dresses Style */}
             <div className="w-64 flex-shrink-0">
               <div className="sticky top-24 space-y-6">
                 {/* Categories */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
                     Categories
                   </h3>
                   <div className="space-y-1">
@@ -453,8 +453,8 @@ export function MarketplacePage() {
                         onClick={() => setSelectedCategory(category.id)}
                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                           selectedCategory === category.id
-                            ? 'bg-blue-600 text-white'
-                            : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                            ? 'bg-brand-pink text-white'
+                            : 'text-text-secondary hover:bg-brand-grey-light hover:text-text-primary'
                         }`}
                       >
                         <span>{category.icon}</span>
@@ -466,8 +466,8 @@ export function MarketplacePage() {
 
                 {/* Filters */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                    Filter By
+                  <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
+                    Filter by
                   </h3>
                   <div className="space-y-1">
                     {FILTERS.map((filter) => {
@@ -478,8 +478,8 @@ export function MarketplacePage() {
                           onClick={() => setSelectedFilter(filter.id)}
                           className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                             selectedFilter === filter.id
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                              ? 'bg-brand-pink text-white'
+                              : 'text-text-secondary hover:bg-brand-grey-light hover:text-text-primary'
                           }`}
                         >
                           <Icon size={16} />
@@ -491,9 +491,9 @@ export function MarketplacePage() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="pt-4 border-t border-gray-800">
+                <div className="pt-4 border-t border-gray-200">
                   <Button className="w-full mb-2" onClick={() => navigate('/list-clothing')}>
-                    List Item
+                    List item
                   </Button>
                   <Button className="w-full" variant="secondary" onClick={() => navigate('/dashboard')}>
                     Dashboard
@@ -505,14 +505,14 @@ export function MarketplacePage() {
             {/* Main Content Grid - 99Dresses Style */}
             <div className="flex-1">
               <div className="mb-4">
-                <p className="text-gray-400">
-                  <span className="font-semibold text-white">{displayItems.length}</span> items available
+                <p className="text-text-secondary">
+                  <span className="font-semibold text-text-primary">{displayItems.length}</span> items available
                 </p>
               </div>
 
               {displayItems.length === 0 ? (
                 <div className="text-center py-16">
-                  <p className="text-gray-400">No items found</p>
+                  <p className="text-text-secondary">No items found</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -526,39 +526,33 @@ export function MarketplacePage() {
                       const hasRecentBid = highestAmount > (item.minimum_button_price || 0);
 
                       return (
-                        <motion.div
+                        <div
                           key={item.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.5) }}
-                          whileHover={{ y: -4 }}
-                          className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden cursor-pointer group"
+                          className="bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer group"
                           onClick={() => setSelectedItem(item)}
                         >
                           {/* Image */}
-                          <div className="relative aspect-[3/4] overflow-hidden bg-gray-900">
+                          <div className="relative aspect-[3/4] overflow-hidden bg-brand-grey-light">
                             <img
                               src={item.image_url}
                               alt={item.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover"
                               onError={(e) => {
                                 e.currentTarget.src = 'https://via.placeholder.com/300x400?text=Image';
                               }}
                             />
                             {isNewListing && (
-                              <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                              <div className="absolute top-2 left-2 bg-brand-pink text-white text-xs px-2 py-1 rounded-full font-medium">
                                 New
                               </div>
                             )}
                             {isDummy && (
-                              <div className="absolute bottom-2 left-2 bg-gray-900/80 text-gray-200 text-[10px] px-2 py-1 rounded-full font-medium">
+                              <div className="absolute bottom-2 left-2 bg-white/90 text-text-secondary text-[10px] px-2 py-1 rounded-full font-medium">
                                 Demo
                               </div>
                             )}
                             {hasRecentBid && (
-                              <div className="absolute top-2 right-2 bg-orange-600 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                              <div className="absolute top-2 right-2 bg-brand-pink text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
                                 <TrendingUp size={12} />
                                 Hot
                               </div>
@@ -567,29 +561,29 @@ export function MarketplacePage() {
 
                           {/* Details */}
                           <div className="p-3">
-                            <p className="text-xs text-gray-500 mb-1">{CATEGORY_LABELS[normalizeCategoryId(item.category)]}</p>
-                            <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                            <p className="text-xs text-text-secondary mb-1">{CATEGORY_LABELS[normalizeCategoryId(item.category)]}</p>
+                            <h3 className="text-sm font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-brand-pink transition-colors">
                               {item.title}
                             </h3>
 
                             {/* Seller */}
                             <div className="flex items-center gap-2 mb-2">
-                              <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                              <div className="w-5 h-5 bg-brand-pink rounded-full flex items-center justify-center text-white text-xs font-bold">
                                 {seller.avatar}
                               </div>
-                              <p className="text-xs text-gray-400">{seller.name}</p>
+                              <p className="text-xs text-text-secondary">{seller.name}</p>
                             </div>
 
                             {/* Price */}
                             <div className="flex items-center justify-between">
                               <div>
-                                <p className="text-xs text-gray-500">Current Bid</p>
-                                <p className="text-lg font-bold text-blue-400">
+                                <p className="text-xs text-text-secondary">Current bid</p>
+                                <p className="text-lg font-semibold text-brand-pink">
                                     {highestAmount}
                                 </p>
                               </div>
                               <div className="text-right">
-                                <div className="flex items-center text-xs text-gray-500">
+                                <div className="flex items-center text-xs text-text-secondary">
                                   <Clock size={12} className="mr-1" />
                                   {getTimeRemaining(item.bidding_ends_at!)}
                                 </div>
@@ -601,17 +595,17 @@ export function MarketplacePage() {
                                   {simulatedBidders.slice(0, 4).map((bidder) => (
                                     <div
                                       key={bidder.id}
-                                      className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white text-[10px] font-semibold flex items-center justify-center border border-gray-900"
+                                      className="w-6 h-6 rounded-full bg-brand-pink text-white text-[10px] font-semibold flex items-center justify-center border border-white"
                                     >
                                       {bidder.avatar}
                                     </div>
                                   ))}
                                 </div>
-                                <span className="text-xs text-gray-500">Simulated bids</span>
+                                <span className="text-xs text-text-secondary">Simulated bids</span>
                               </div>
                             )}
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </AnimatePresence>
@@ -630,7 +624,7 @@ export function MarketplacePage() {
           setError('');
           setBidAmount('');
         }}
-        title="Place Your Bid"
+        title="Place your bid"
       >
         {selectedItem && (
           <form onSubmit={handlePlaceBid} className="space-y-4">
@@ -641,32 +635,32 @@ export function MarketplacePage() {
                 className="w-24 h-32 object-cover rounded-lg"
               />
               <div className="flex-1">
-                <h3 className="font-semibold text-white mb-1">{selectedItem.title}</h3>
-                <p className="text-sm text-gray-400 mb-2">{CATEGORY_LABELS[normalizeCategoryId(selectedItem.category)]}</p>
+                <h3 className="font-semibold text-text-primary mb-1">{selectedItem.title}</h3>
+                <p className="text-sm text-text-secondary mb-2">{CATEGORY_LABELS[normalizeCategoryId(selectedItem.category)]}</p>
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-6 h-6 bg-brand-pink rounded-full flex items-center justify-center text-white text-xs font-bold">
                     {getUserById(selectedItem.user_id!).avatar}
                   </div>
-                  <p className="text-xs text-gray-400">{getUserById(selectedItem.user_id!).name}</p>
+                  <p className="text-xs text-text-secondary">{getUserById(selectedItem.user_id!).name}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-900 rounded-lg p-3 space-y-2">
+            <div className="bg-brand-grey-light rounded-lg p-3 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-400">Current Bid:</span>
-                <span className="font-bold text-blue-400">
+                <span className="text-text-secondary">Current bid:</span>
+                <span className="font-semibold text-brand-pink">
                   {getHighestBidAmount(selectedItem)} buttons
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-400">Your Balance:</span>
-                <span className="font-bold text-green-400">{displayBalance} buttons</span>
+                <span className="text-text-secondary">Your balance:</span>
+                <span className="font-semibold text-text-primary">{displayBalance} buttons</span>
               </div>
             </div>
 
             <Input
-              label="Your Bid (buttons)"
+              label="Your bid (buttons)"
               type="number"
               min={getMinimumNextBid(selectedItem)}
               placeholder={`Minimum: ${getMinimumNextBid(selectedItem)}`}
@@ -676,13 +670,9 @@ export function MarketplacePage() {
             />
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm"
-              >
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                 {error}
-              </motion.div>
+              </div>
             )}
 
             <Button
@@ -691,10 +681,10 @@ export function MarketplacePage() {
               disabled={bidding || selectedItem.user_id === user?.id}
             >
               {bidding
-                ? 'Placing Bid...'
+                ? 'Placing bid...'
                 : selectedItem.user_id === user?.id
-                  ? 'Your Listing'
-                  : 'Place Bid'}
+                  ? 'Your listing'
+                  : 'Place bid'}
             </Button>
           </form>
         )}

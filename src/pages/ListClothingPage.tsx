@@ -70,26 +70,22 @@ export function ListClothingPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 relative">
+    <div className="min-h-screen p-4 relative bg-white">
       <Background />
       <div className="max-w-2xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
+        <div className="mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft size={20} className="mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-white mb-2">List Clothing Item</h1>
-          <p className="text-gray-400">List your clothing item and start receiving bids in buttons</p>
-        </motion.div>
+          <h1 className="text-3xl font-semibold text-text-primary mb-2">List clothing item</h1>
+          <p className="text-text-secondary">List your clothing item and start receiving bids in buttons</p>
+        </div>
 
         <Card>
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
-              label="Item Title"
+              label="Item title"
               placeholder="e.g., Vintage Denim Jacket"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -97,13 +93,13 @@ export function ListClothingPage() {
             />
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-primary mb-2">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-pink"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -114,8 +110,8 @@ export function ListClothingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-3">
-                Item Images
+              <label className="block text-sm font-medium text-text-primary mb-3">
+                Item images
               </label>
 
               <div className="flex gap-2 mb-4">
@@ -125,7 +121,7 @@ export function ListClothingPage() {
                   size="sm"
                   onClick={() => setUseUpload(true)}
                 >
-                  Upload Images
+                  Upload images
                 </Button>
                 <Button
                   type="button"
@@ -152,8 +148,8 @@ export function ListClothingPage() {
                   />
 
                   {imageUrl && (
-                    <div className="mt-4 border border-gray-700 rounded-lg p-4">
-                      <p className="text-sm text-gray-400 mb-2">Preview:</p>
+                    <div className="mt-4 border border-gray-200 rounded-lg p-4">
+                      <p className="text-sm text-text-secondary mb-2">Preview:</p>
                       <img
                         src={imageUrl}
                         alt="Preview"
@@ -169,7 +165,7 @@ export function ListClothingPage() {
             </div>
 
             <Input
-              label="Minimum Button Price"
+              label="Minimum button price"
               type="number"
               min="1"
               placeholder="e.g., 50"
@@ -178,25 +174,21 @@ export function ListClothingPage() {
               required
             />
 
-            <div className="bg-blue-600/10 border border-blue-600/20 rounded-lg p-4">
-              <p className="text-sm text-blue-400">
+            <div className="bg-brand-pink/10 border border-brand-pink/20 rounded-lg p-4">
+              <p className="text-sm text-brand-pink">
                 Your item will be listed for 3 days. Users can bid buttons on your item.
                 The highest bidder wins when the auction ends.
               </p>
             </div>
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm"
-              >
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                 {error}
-              </motion.div>
+              </div>
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Listing...' : 'List Item'}
+              {loading ? 'Listing...' : 'List item'}
             </Button>
           </form>
         </Card>
