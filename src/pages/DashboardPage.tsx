@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Clothes, ClothingBid, ButtonResaleListing, ButtonResaleBid } from '../lib/supabase';
+import { getDemoBidsForUser } from '../lib/dummyData';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Background } from '../components/Background';
@@ -74,17 +75,37 @@ export function DashboardPage() {
 
     if (clothesRes.data) setMyClothes(clothesRes.data);
     if (bidsRes.data) {
-      setMyBids(bidsRes.data);
+      const demoBids = profile?.id ? getDemoBidsForUser(profile.id) : [];
+      const combinedBids: ClothingBid[] = [
+        ...bidsRes.data,
+        ...demoBids.map((bid) => ({
+          id: bid.id,
+          clothes_id: bid.clothes_id,
+          bidder_id: bid.bidder_id,
+          amount: bid.amount,
+          status: 'active',
+          created_at: bid.created_at,
+        })),
+      ];
+
+      setMyBids(combinedBids);
 
       // Fetch the clothes items that user has bid on
-      const clothesIds = bidsRes.data.map(bid => bid.clothes_id);
+      const clothesIds = combinedBids.map(bid => bid.clothes_id);
       if (clothesIds.length > 0) {
         const { data: biddedClothesData } = await supabase
           .from('clothes')
           .select('*')
           .in('id', clothesIds);
 
-        if (biddedClothesData) setBiddedClothes(biddedClothesData);
+        const demoClothes = demoBids.map((bid) => bid.item).filter(Boolean) as Clothes[];
+        if (biddedClothesData) {
+          const merged = [...biddedClothesData, ...demoClothes];
+          const unique = merged.filter((item, index, arr) => arr.findIndex((c) => c.id === item.id) === index);
+          setBiddedClothes(unique);
+        } else if (demoClothes.length > 0) {
+          setBiddedClothes(demoClothes);
+        }
 
         const { data: activeClothingBids } = await supabase
           .from('clothing_bids')
@@ -95,6 +116,12 @@ export function DashboardPage() {
         if (activeClothingBids) {
           const highestMap: Record<string, { amount: number; bidderId: string | null }> = {};
           activeClothingBids.forEach((bid) => {
+            const existing = highestMap[bid.clothes_id];
+            if (!existing || bid.amount > existing.amount) {
+              highestMap[bid.clothes_id] = { amount: bid.amount, bidderId: bid.bidder_id };
+            }
+          });
+          demoBids.forEach((bid) => {
             const existing = highestMap[bid.clothes_id];
             if (!existing || bid.amount > existing.amount) {
               highestMap[bid.clothes_id] = { amount: bid.amount, bidderId: bid.bidder_id };

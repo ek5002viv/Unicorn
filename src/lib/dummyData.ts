@@ -148,6 +148,16 @@ export function simulateLiveActivity(items: Partial<Clothes>[]): Partial<Clothes
         current_highest_bid: (item.current_highest_bid || item.minimum_button_price!) + incrementAmount,
         highest_bidder_id: getRandomElement(DUMMY_USERS).id,
       };
+
+    type DemoBidRecord = {
+      id: string;
+      clothes_id: string;
+      bidder_id: string;
+      amount: number;
+      status: 'active';
+      created_at: string;
+      item: Partial<Clothes>;
+    };
     }
     return item;
   });
@@ -204,6 +214,66 @@ function getTransactionDescription(type: string, amount: number): string {
 
 export function getUserById(userId: string) {
   return DUMMY_USERS.find(u => u.id === userId) || DUMMY_USERS[0];
+}
+
+const DEMO_BIDS_KEY = 'unicorn_demo_bids';
+
+function readDemoBids(): DemoBidRecord[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(DEMO_BIDS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as DemoBidRecord[];
+  } catch {
+    return [];
+  }
+}
+
+function writeDemoBids(bids: DemoBidRecord[]) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(DEMO_BIDS_KEY, JSON.stringify(bids));
+}
+
+export function getDemoBidsForUser(userId: string) {
+  return readDemoBids().filter((bid) => bid.bidder_id === userId);
+}
+
+export function upsertDemoBid(userId: string, item: Partial<Clothes>, amount: number) {
+  if (!item.id) return;
+  const bids = readDemoBids();
+  const existingIndex = bids.findIndex(
+    (bid) => bid.bidder_id === userId && bid.clothes_id === item.id
+  );
+  const record: DemoBidRecord = {
+    id: existingIndex >= 0 ? bids[existingIndex].id : `demo-bid-${Date.now()}`,
+    clothes_id: item.id,
+    bidder_id: userId,
+    amount,
+    status: 'active',
+    created_at: new Date().toISOString(),
+    item: {
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      image_url: item.image_url,
+      minimum_button_price: item.minimum_button_price,
+      current_highest_bid: amount,
+      highest_bidder_id: userId,
+      status: item.status,
+      bidding_ends_at: item.bidding_ends_at,
+      created_at: item.created_at,
+      updated_at: new Date().toISOString(),
+      user_id: item.user_id,
+    },
+  };
+
+  if (existingIndex >= 0) {
+    bids[existingIndex] = record;
+  } else {
+    bids.push(record);
+  }
+
+  writeDemoBids(bids);
 }
 
 function hashStringToInt(value: string) {

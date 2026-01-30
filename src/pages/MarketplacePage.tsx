@@ -13,7 +13,9 @@ import {
   simulateLiveActivity,
   getUserById,
   getItemsByStatus,
-  getSimulatedBidders
+  getSimulatedBidders,
+  getDemoBidsForUser,
+  upsertDemoBid
 } from '../lib/dummyData';
 import { deductButtons, refundButtons } from '../lib/buttonService';
 
@@ -85,6 +87,7 @@ export function MarketplacePage() {
   const [error, setError] = useState('');
   const [liveUpdateKey, setLiveUpdateKey] = useState(0);
   const [highestBidByClothes, setHighestBidByClothes] = useState<Record<string, { amount: number; bidderId: string | null }>>({});
+  const [demoBids, setDemoBids] = useState<{ clothes_id: string; amount: number }[]>([]);
 
   // Load initial data (mix of real + dummy) and setup real-time updates
   useEffect(() => {
@@ -132,6 +135,16 @@ export function MarketplacePage() {
       clearInterval(interval);
     };
   }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      const bids = getDemoBidsForUser(user.id).map((bid) => ({
+        clothes_id: bid.clothes_id,
+        amount: bid.amount,
+      }));
+      setDemoBids(bids);
+    }
+  }, [user?.id]);
 
   // Apply filters and categories
   useEffect(() => {
@@ -214,8 +227,19 @@ export function MarketplacePage() {
 
   const getHighestBidAmount = (item: Partial<Clothes>) => {
     if (!item.id) return item.current_highest_bid || item.minimum_button_price || 0;
+    if (item.id.startsWith('dummy-')) {
+      const demo = demoBids.find((bid) => bid.clothes_id === item.id);
+      if (demo) return demo.amount;
+    }
     const highest = highestBidByClothes[item.id];
     return highest?.amount ?? item.current_highest_bid ?? item.minimum_button_price ?? 0;
+  };
+
+  const getMinimumNextBid = (item: Partial<Clothes>) => {
+    const highest = getHighestBidAmount(item);
+    const minimum = item.minimum_button_price ?? 0;
+    if (highest <= 0 || highest === minimum) return minimum;
+    return Math.max(minimum, highest + 1);
   };
 
   const handlePlaceBid = async (e: React.FormEvent) => {
@@ -227,7 +251,7 @@ export function MarketplacePage() {
 
     try {
       const bid = parseInt(bidAmount);
-      const minBid = getHighestBidAmount(selectedItem) + 1;
+      const minBid = getMinimumNextBid(selectedItem);
 
       if (bid < minBid) {
         throw new Error(`Bid must be at least ${minBid} buttons`);
@@ -313,17 +337,12 @@ export function MarketplacePage() {
           [selectedItem.id]: { amount: bid, bidderId: user.id }
         }));
       } else if (isDummyItem && selectedItem.id) {
-        setAllItems(prev =>
-          prev.map(item =>
-            item.id === selectedItem.id
-              ? { ...item, current_highest_bid: bid, highest_bidder_id: user.id }
-              : item
-          )
-        );
-        setHighestBidByClothes(prev => ({
-          ...prev,
-          [selectedItem.id]: { amount: bid, bidderId: user.id }
-        }));
+        upsertDemoBid(user.id, selectedItem, bid);
+        setDemoBids(prev => {
+          const next = prev.filter((entry) => entry.clothes_id !== selectedItem.id);
+          next.push({ clothes_id: selectedItem.id, amount: bid });
+          return next;
+        });
       }
 
       await refreshProfile();
@@ -513,6 +532,11 @@ export function MarketplacePage() {
                                 New
                               </div>
                             )}
+                            {isDummy && (
+                              <div className="absolute bottom-2 left-2 bg-gray-900/80 text-gray-200 text-[10px] px-2 py-1 rounded-full font-medium">
+                                Demo
+                              </div>
+                            )}
                             {hasRecentBid && (
                               <div className="absolute top-2 right-2 bg-orange-600 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
                                 <TrendingUp size={12} />
@@ -624,8 +648,8 @@ export function MarketplacePage() {
             <Input
               label="Your Bid (buttons)"
               type="number"
-              min={getHighestBidAmount(selectedItem) + 1}
-              placeholder={`Minimum: ${getHighestBidAmount(selectedItem) + 1}`}
+              min={getMinimumNextBid(selectedItem)}
+              placeholder={`Minimum: ${getMinimumNextBid(selectedItem)}`}
               value={bidAmount}
               onChange={(e) => setBidAmount(e.target.value)}
               required
@@ -641,8 +665,16 @@ export function MarketplacePage() {
               </motion.div>
             )}
 
-            <Button type="submit" className="w-full" disabled={bidding || selectedItem.user_id === user?.id}>
-              {bidding ? 'Placing Bid...' : selectedItem.user_id === user?.id ? 'Your Listing' : 'Place Bid'}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={bidding || selectedItem.user_id === user?.id}
+            >
+              {bidding
+                ? 'Placing Bid...'
+                : selectedItem.user_id === user?.id
+                  ? 'Your Listing'
+                  : 'Place Bid'}
             </Button>
           </form>
         )}
