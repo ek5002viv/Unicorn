@@ -44,35 +44,35 @@ function getActivityIcon(type: string) {
 function getActivityColor(type: string) {
   switch (type) {
     case 'spent_bid':
-      return 'bg-purple-600';
+      return 'bg-brand-pink';
     case 'purchase_platform':
     case 'purchase_user':
-      return 'bg-blue-600';
+      return 'bg-brand-pink';
     case 'earned_sale':
       return 'bg-green-600';
     case 'refund':
       return 'bg-yellow-600';
     case 'initial_grant':
-      return 'bg-teal-600';
+      return 'bg-brand-pink';
     default:
-      return 'bg-gray-600';
+      return 'bg-gray-400';
   }
 }
 
 function getActivityTitle(transaction: ButtonTransaction): string {
   switch (transaction.transaction_type) {
     case 'spent_bid':
-      return 'Placed Bid';
+      return 'Placed bid';
     case 'purchase_platform':
-      return 'Purchased Buttons';
+      return 'Purchased buttons';
     case 'purchase_user':
-      return 'Purchased Buttons from User';
+      return 'Purchased buttons from user';
     case 'earned_sale':
-      return 'Earned from Sale';
+      return 'Earned from sale';
     case 'refund':
-      return 'Refund Received';
+      return 'Refund received';
     case 'initial_grant':
-      return 'Initial Grant';
+      return 'Initial grant';
     default:
       return 'Transaction';
   }
@@ -109,53 +109,44 @@ export function RecentActivityPage() {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative bg-white">
       <Background />
 
       <div className="relative z-10">
         {/* Header */}
-        <div className="border-b border-gray-700" style={{ backgroundColor: '#4B2D4F' }}>
-          <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="border-b border-gray-200 bg-white">
+          <div className="max-w-[1100px] mx-auto px-4 py-6">
             <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
               <ArrowLeft size={20} className="mr-2" />
               Back
             </Button>
-            <h1 className="text-3xl font-bold text-white mb-2">Recent Activity</h1>
-            <p className="text-text-body">All button transactions across the marketplace</p>
+            <h1 className="text-3xl font-semibold text-text-primary mb-2">Recent activity</h1>
+            <p className="text-text-secondary">All button transactions across the marketplace</p>
           </div>
         </div>
 
         {/* Activity Timeline */}
-        <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="max-w-[1100px] mx-auto px-4 py-8">
           {loading ? (
             <div className="text-center py-16">
-              <p className="text-gray-400">Loading activities...</p>
+              <p className="text-text-secondary">Loading activities...</p>
             </div>
           ) : transactions.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-gray-400">No activities yet</p>
-              <p className="text-sm text-gray-500 mt-2">Start bidding or listing items to see activity here</p>
+              <p className="text-text-secondary">No activities yet</p>
+              <p className="text-sm text-text-secondary mt-2">Start bidding or listing items to see activity here</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {transactions.map((transaction, index) => {
+              {transactions.map((transaction) => {
                 const Icon = getActivityIcon(transaction.transaction_type);
                 const colorClass = getActivityColor(transaction.transaction_type);
                 const title = getActivityTitle(transaction);
                 const isPositive = transaction.amount > 0;
 
                 return (
-                  <motion.div
-                    key={transaction.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: Math.min(index * 0.02, 0.4) }}
-                  >
-                    <Card
-                      hover
-                      className="cursor-pointer transition-all duration-200"
-                      style={{ backgroundColor: '#FFFFFF' }}
-                    >
+                  <div key={transaction.id}>
+                    <Card hover className="cursor-pointer transition-all duration-200">
                       <div className="flex items-start gap-4">
                         {/* Icon */}
                         <div className={`flex-shrink-0 w-12 h-12 ${colorClass} rounded-full flex items-center justify-center`}>
@@ -166,24 +157,24 @@ export function RecentActivityPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between mb-2">
                             <div>
-                              <p className="text-text-card text-base font-semibold">
+                              <p className="text-text-primary text-base font-semibold">
                                 {title}
                               </p>
-                              <p className="text-sm text-gray-600 mt-1">
+                              <p className="text-sm text-text-secondary mt-1">
                                 {transaction.description}
                               </p>
                             </div>
                             <div className={`text-right ml-4 ${
                               isPositive ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              <p className="text-xl font-bold">
+                              <p className="text-xl font-semibold">
                                 {isPositive ? '+' : ''}{transaction.amount}
                               </p>
-                              <p className="text-xs text-gray-500">buttons</p>
+                              <p className="text-xs text-text-secondary">buttons</p>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <div className="flex items-center gap-4 text-sm text-text-secondary">
                             <div className="flex items-center gap-1">
                               <Clock size={14} />
                               <span>{getRelativeTime(transaction.created_at)}</span>
@@ -195,7 +186,7 @@ export function RecentActivityPage() {
                         </div>
                       </div>
                     </Card>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -205,7 +196,7 @@ export function RecentActivityPage() {
           {transactions.length > 0 && (
             <div className="mt-8 text-center">
               <Button variant="secondary" onClick={loadActivities}>
-                Refresh Activity
+                Refresh activity
               </Button>
             </div>
           )}

@@ -71,28 +71,24 @@ export function SellButtonsPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 relative">
+    <div className="min-h-screen p-4 relative bg-white">
       <Background />
       <div className="max-w-2xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
+        <div className="mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft size={20} className="mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-white mb-2">Sell Buttons</h1>
-          <p className="text-gray-400">List your buttons for sale and receive real money</p>
-        </motion.div>
+          <h1 className="text-3xl font-semibold text-text-primary mb-2">Sell buttons</h1>
+          <p className="text-text-secondary">List your buttons for sale and receive real money</p>
+        </div>
 
         <Card>
-          <div className="bg-blue-600/10 border border-blue-600/20 rounded-lg p-4 mb-6">
+          <div className="bg-brand-pink/10 border border-brand-pink/20 rounded-lg p-4 mb-6">
             <div className="flex items-start gap-3">
-              <AlertCircle size={20} className="text-blue-400 mt-0.5" />
-              <div className="text-sm text-blue-400">
-                <p className="font-semibold mb-1">How Button Resale Works</p>
+              <AlertCircle size={20} className="text-brand-pink mt-0.5" />
+              <div className="text-sm text-brand-pink">
+                <p className="font-semibold mb-1">How button resale works</p>
                 <p>
                   Your buttons will be held in escrow during the auction period (3 days).
                   Other users can bid real money to purchase your buttons. The highest bidder
@@ -102,16 +98,16 @@ export function SellButtonsPage() {
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-4 mb-6">
+          <div className="bg-brand-grey-light rounded-lg p-4 mb-6">
             <div className="flex items-center justify-between">
-              <span className="text-gray-400">Your Available Balance:</span>
-              <span className="text-2xl font-bold text-blue-400">{profile?.button_balance || 0} buttons</span>
+              <span className="text-text-secondary">Your available balance:</span>
+              <span className="text-2xl font-semibold text-brand-pink">{profile?.button_balance || 0} buttons</span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
-              label="Number of Buttons to Sell"
+              label="Number of buttons to sell"
               type="number"
               min="1"
               max={profile?.button_balance || 0}
@@ -122,7 +118,7 @@ export function SellButtonsPage() {
             />
 
             <Input
-              label="Minimum Price (USD)"
+              label="Minimum price (USD)"
               type="number"
               step="0.01"
               min="0.01"
@@ -133,25 +129,21 @@ export function SellButtonsPage() {
             />
 
             {buttonAmount && minimumPrice && (
-              <div className="bg-green-600/10 border border-green-600/20 rounded-lg p-4">
-                <p className="text-sm text-green-400">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm text-green-600">
                   Rate: ${(parseFloat(minimumPrice) / parseInt(buttonAmount)).toFixed(4)} per button
                 </p>
               </div>
             )}
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm"
-              >
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                 {error}
-              </motion.div>
+              </div>
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating Listing...' : 'Create Listing'}
+              {loading ? 'Creating listing...' : 'Create listing'}
             </Button>
           </form>
         </Card>

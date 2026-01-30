@@ -121,50 +121,46 @@ export function BuyButtonsPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 relative">
+    <div className="min-h-screen p-4 relative bg-white">
       <Background />
-      <div className="max-w-7xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
+      <div className="max-w-[1100px] mx-auto relative z-10">
+        <div className="mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
             <ArrowLeft size={20} className="mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-white mb-2">Buy Buttons</h1>
-          <p className="text-gray-400">Purchase buttons from the platform or other users</p>
-        </motion.div>
+          <h1 className="text-3xl font-semibold text-text-primary mb-2">Buy buttons</h1>
+          <p className="text-text-secondary">Purchase buttons from the platform or other users</p>
+        </div>
 
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <Building2 size={24} className="text-blue-400" />
-            <h2 className="text-2xl font-bold text-white">Platform Packages</h2>
+            <Building2 size={24} className="text-brand-pink" />
+            <h2 className="text-2xl font-semibold text-text-primary">Platform packages</h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {PLATFORM_PACKAGES.map((pkg) => (
-              <Card key={pkg.amount} hover className={pkg.popular ? 'ring-2 ring-blue-500' : ''}>
+              <Card key={pkg.amount} hover className={pkg.popular ? 'ring-2 ring-brand-pink' : ''}>
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
+                    <span className="bg-brand-pink text-white text-xs px-3 py-1 rounded-full">
                       Popular
                     </span>
                   </div>
                 )}
                 <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-pink rounded-full mb-4">
                     <Coins size={32} className="text-white" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white mb-2">{pkg.amount}</h3>
-                  <p className="text-gray-400 mb-4">buttons</p>
-                  <p className="text-2xl font-bold text-green-400 mb-4">${pkg.price}</p>
+                  <h3 className="text-3xl font-semibold text-text-primary mb-2">{pkg.amount}</h3>
+                  <p className="text-text-secondary mb-4">buttons</p>
+                  <p className="text-2xl font-semibold text-green-600 mb-4">${pkg.price}</p>
                   <Button
                     onClick={() => handleBuyFromPlatform(pkg)}
                     disabled={purchasing}
                     className="w-full"
                   >
-                    Buy Now
+                    Buy now
                   </Button>
                 </div>
               </Card>
@@ -174,16 +170,16 @@ export function BuyButtonsPage() {
 
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <Users size={24} className="text-green-400" />
-            <h2 className="text-2xl font-bold text-white">User Listings</h2>
+            <Users size={24} className="text-brand-pink" />
+            <h2 className="text-2xl font-semibold text-text-primary">User listings</h2>
           </div>
           {loading ? (
             <Card>
-              <p className="text-gray-400 text-center">Loading...</p>
+              <p className="text-text-secondary text-center">Loading...</p>
             </Card>
           ) : userListings.length === 0 ? (
             <Card>
-              <p className="text-gray-400 text-center">No user listings available</p>
+              <p className="text-text-secondary text-center">No user listings available</p>
             </Card>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -193,23 +189,23 @@ export function BuyButtonsPage() {
                   <Card key={listing.id} hover>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 bg-brand-pink rounded-full flex items-center justify-center text-white text-xs font-bold">
                           {seller.avatar}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-white">{seller.name}</p>
-                          <p className="text-xs text-gray-500">{seller.buttonBalance} buttons</p>
+                          <p className="text-sm font-medium text-text-primary">{seller.name}</p>
+                          <p className="text-xs text-text-secondary">{seller.buttonBalance} buttons</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-400">Amount</p>
-                          <p className="text-2xl font-bold text-blue-400">{listing.button_amount}</p>
-                          <p className="text-xs text-gray-500">buttons</p>
+                          <p className="text-sm text-text-secondary">Amount</p>
+                          <p className="text-2xl font-semibold text-brand-pink">{listing.button_amount}</p>
+                          <p className="text-xs text-text-secondary">buttons</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-400">Current Bid</p>
-                          <p className="text-2xl font-bold text-green-400">
+                          <p className="text-sm text-text-secondary">Current bid</p>
+                          <p className="text-2xl font-semibold text-green-600">
                             ${listing.current_highest_bid_usd || listing.minimum_price_usd}
                           </p>
                         </div>
@@ -219,7 +215,7 @@ export function BuyButtonsPage() {
                         className="w-full"
                         disabled={listing.highest_bidder_id === user?.id}
                       >
-                        {listing.highest_bidder_id === user?.id ? 'You\'re Winning' : 'Place Bid'}
+                        {listing.highest_bidder_id === user?.id ? 'You\'re winning' : 'Place bid'}
                       </Button>
                     </div>
                   </Card>
@@ -237,25 +233,25 @@ export function BuyButtonsPage() {
           setError('');
           setBidAmount('');
         }}
-        title="Place Bid"
+        title="Place bid"
       >
         {selectedListing && (
           <form onSubmit={handleBidOnListing} className="space-y-4">
             <div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-400">Buttons:</span>
-                <span className="font-bold text-blue-400">{selectedListing.button_amount}</span>
+                <span className="text-text-secondary">Buttons:</span>
+                <span className="font-semibold text-brand-pink">{selectedListing.button_amount}</span>
               </div>
               <div className="flex items-center justify-between text-sm mt-1">
-                <span className="text-gray-400">Current Bid:</span>
-                <span className="font-bold text-green-400">
+                <span className="text-text-secondary">Current bid:</span>
+                <span className="font-semibold text-green-600">
                   ${selectedListing.current_highest_bid_usd || selectedListing.minimum_price_usd}
                 </span>
               </div>
             </div>
 
             <Input
-              label="Your Bid (USD)"
+              label="Your bid (USD)"
               type="number"
               step="0.01"
               min={(selectedListing.current_highest_bid_usd || selectedListing.minimum_price_usd) + 0.01}
@@ -266,17 +262,13 @@ export function BuyButtonsPage() {
             />
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm"
-              >
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                 {error}
-              </motion.div>
+              </div>
             )}
 
             <Button type="submit" className="w-full" disabled={purchasing}>
-              {purchasing ? 'Placing Bid...' : 'Confirm Bid'}
+              {purchasing ? 'Placing bid...' : 'Confirm bid'}
             </Button>
           </form>
         )}
