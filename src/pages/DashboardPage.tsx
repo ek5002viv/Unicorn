@@ -17,6 +17,7 @@ export function DashboardPage() {
   const [myButtonListings, setMyButtonListings] = useState<ButtonResaleListing[]>([]);
   const [myButtonBids, setMyButtonBids] = useState<ButtonResaleBid[]>([]);
   const [loading, setLoading] = useState(true);
+  const activeButtonListings = myButtonListings.filter((listing) => listing.status === 'active');
 
   useEffect(() => {
     loadDashboardData();
@@ -155,9 +156,9 @@ export function DashboardPage() {
                 <ShoppingBag size={24} className="text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Active Bids</p>
-                <p className="text-2xl font-bold text-white">{myBids.length + myButtonBids.length}</p>
-                <p className="text-xs text-gray-500">{myBids.length} clothing, {myButtonBids.length} buttons</p>
+                <p className="text-sm text-gray-400">Active Bids & Sales</p>
+                <p className="text-2xl font-bold text-white">{myBids.length + myButtonBids.length + activeButtonListings.length}</p>
+                <p className="text-xs text-gray-500">{myBids.length} clothing bids, {myButtonBids.length} button bids, {activeButtonListings.length} button sales</p>
               </div>
             </div>
           </Card>

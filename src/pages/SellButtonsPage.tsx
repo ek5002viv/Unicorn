@@ -35,7 +35,7 @@ export function SellButtonsPage() {
       }
 
       const biddingEndsAt = new Date();
-      biddingEndsAt.setDate(biddingEndsAt.getDate() + 7);
+      biddingEndsAt.setDate(biddingEndsAt.getDate() + 3);
 
       const { error: insertError } = await supabase.from('button_resale_listings').insert({
         seller_id: user?.id,
@@ -94,7 +94,7 @@ export function SellButtonsPage() {
               <div className="text-sm text-blue-400">
                 <p className="font-semibold mb-1">How Button Resale Works</p>
                 <p>
-                  Your buttons will be held in escrow during the auction period (7 days).
+                  Your buttons will be held in escrow during the auction period (3 days).
                   Other users can bid real money to purchase your buttons. The highest bidder
                   wins when the auction ends.
                 </p>

@@ -84,8 +84,8 @@ export function generateDummyClothes(count: number = 20): Partial<Clothes>[] {
     const hasBids = Math.random() > 0.3;
     const currentBid = hasBids ? minimumPrice + getRandomInt(5, 50) : 0;
 
-    const createdAt = getRandomDate(168, 1); // Listed within last week
-    const endsAt = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from creation
+    const createdAt = getRandomDate(72, 1); // Listed within last 3 days
+    const endsAt = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days from creation
 
     items.push({
       id: `dummy-${i}`,
@@ -119,8 +119,8 @@ export function generateDummyButtonListings(count: number = 10): Partial<ButtonR
     const hasBids = Math.random() > 0.4;
     const currentBid = hasBids ? minimumPrice + getRandomInt(1, 5) : 0;
 
-    const createdAt = getRandomDate(168, 1);
-    const endsAt = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const createdAt = getRandomDate(72, 1);
+    const endsAt = new Date(createdAt.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     listings.push({
       id: `button-listing-${i}`,
@@ -204,6 +204,31 @@ function getTransactionDescription(type: string, amount: number): string {
 
 export function getUserById(userId: string) {
   return DUMMY_USERS.find(u => u.id === userId) || DUMMY_USERS[0];
+}
+
+function hashStringToInt(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+export function getSimulatedBidders(itemId: string, maxCount: number = 4) {
+  const seed = hashStringToInt(itemId);
+  const count = Math.max(2, (seed % maxCount) + 1);
+  const bidders: typeof DUMMY_USERS = [];
+
+  for (let i = 0; i < count; i++) {
+    const index = (seed + i * 7) % DUMMY_USERS.length;
+    const candidate = DUMMY_USERS[index];
+    if (!bidders.find(bidder => bidder.id === candidate.id)) {
+      bidders.push(candidate);
+    }
+  }
+
+  return bidders;
 }
 
 export function getItemsByStatus(items: Partial<Clothes>[], status: 'new' | 'ending' | 'hot') {

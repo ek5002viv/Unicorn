@@ -47,7 +47,7 @@ export function ListClothingPage() {
       }
 
       const biddingEndsAt = new Date();
-      biddingEndsAt.setDate(biddingEndsAt.getDate() + 7);
+      biddingEndsAt.setDate(biddingEndsAt.getDate() + 3);
 
       const { error: insertError } = await supabase.from('clothes').insert({
         user_id: user?.id,
@@ -180,7 +180,7 @@ export function ListClothingPage() {
 
             <div className="bg-blue-600/10 border border-blue-600/20 rounded-lg p-4">
               <p className="text-sm text-blue-400">
-                Your item will be listed for 7 days. Users can bid buttons on your item.
+                Your item will be listed for 3 days. Users can bid buttons on your item.
                 The highest bidder wins when the auction ends.
               </p>
             </div>

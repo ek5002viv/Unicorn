@@ -12,18 +12,57 @@ import {
   generateDummyClothes,
   simulateLiveActivity,
   getUserById,
-  getItemsByStatus
+  getItemsByStatus,
+  getSimulatedBidders
 } from '../lib/dummyData';
 import { deductButtons, refundButtons } from '../lib/buttonService';
 
 const CATEGORIES = [
-  { id: 'all', name: 'All Dresses', icon: '👗' },
-  { id: 'dresses', name: 'Dresses', icon: '👗' },
+  { id: 'all', name: 'All Items', icon: '✨' },
   { id: 'tops', name: 'Tops', icon: '👚' },
   { id: 'bottoms', name: 'Bottoms', icon: '👖' },
+  { id: 'dresses', name: 'Dresses', icon: '👗' },
   { id: 'outerwear', name: 'Outerwear', icon: '🧥' },
+  { id: 'shoes', name: 'Shoes', icon: '👟' },
   { id: 'accessories', name: 'Accessories', icon: '👜' },
+  { id: 'other', name: 'Other', icon: '🧷' },
 ];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  tops: 'Tops',
+  bottoms: 'Bottoms',
+  dresses: 'Dresses',
+  outerwear: 'Outerwear',
+  shoes: 'Shoes',
+  accessories: 'Accessories',
+  other: 'Other',
+};
+
+const normalizeCategoryId = (category?: string) => {
+  if (!category) return 'other';
+  const normalized = category.trim().toLowerCase();
+
+  if (['tops', 'top', 'shirt', 'blouse', 'tee', 't-shirt', 'tshirt', 'tank', 'crop'].some((term) => normalized.includes(term))) {
+    return 'tops';
+  }
+  if (['bottoms', 'bottom', 'pants', 'jeans', 'shorts', 'skirt', 'trouser'].some((term) => normalized.includes(term))) {
+    return 'bottoms';
+  }
+  if (['dress', 'dresses'].some((term) => normalized.includes(term))) {
+    return 'dresses';
+  }
+  if (['outerwear', 'jacket', 'coat', 'hoodie', 'sweater', 'cardigan'].some((term) => normalized.includes(term))) {
+    return 'outerwear';
+  }
+  if (['shoes', 'shoe', 'sneaker', 'boot', 'heels', 'loafer', 'sandals'].some((term) => normalized.includes(term))) {
+    return 'shoes';
+  }
+  if (['accessories', 'accessory', 'bag', 'bags', 'jewelry', 'belt', 'hat', 'scarf'].some((term) => normalized.includes(term))) {
+    return 'accessories';
+  }
+
+  return 'other';
+};
 
 const FILTERS = [
   { id: 'all', name: 'All Items', icon: Sparkles },
@@ -100,7 +139,7 @@ export function MarketplacePage() {
     // Category filter
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(item =>
-        item.category?.toLowerCase() === selectedCategory.toLowerCase()
+        normalizeCategoryId(item.category) === selectedCategory
       );
     }
 
@@ -111,10 +150,16 @@ export function MarketplacePage() {
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered.filter(item =>
-        item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => {
+        const categoryId = normalizeCategoryId(item.category);
+        const categoryLabel = CATEGORY_LABELS[categoryId];
+        return (
+          item.title?.toLowerCase().includes(query) ||
+          item.category?.toLowerCase().includes(query) ||
+          categoryLabel.toLowerCase().includes(query)
+        );
+      });
     }
 
     setDisplayItems(filtered);
@@ -165,8 +210,10 @@ export function MarketplacePage() {
         throw new Error('Insufficient button balance');
       }
 
+      const isDummyItem = selectedItem.id?.startsWith('dummy-');
+
       // Only process if it's a real item (not dummy)
-      if (!selectedItem.id?.startsWith('dummy-') && selectedItem.id) {
+      if (!isDummyItem && selectedItem.id) {
         const itemId = selectedItem.id;
         const previousBidderId = selectedItem.highest_bidder_id;
         const previousBidAmount = selectedItem.current_highest_bid || 0;
@@ -226,6 +273,22 @@ export function MarketplacePage() {
             highest_bidder_id: user.id,
           })
           .eq('id', selectedItem.id);
+
+        setAllItems(prev =>
+          prev.map(item =>
+            item.id === selectedItem.id
+              ? { ...item, current_highest_bid: bid, highest_bidder_id: user.id }
+              : item
+          )
+        );
+      } else if (isDummyItem && selectedItem.id) {
+        setAllItems(prev =>
+          prev.map(item =>
+            item.id === selectedItem.id
+              ? { ...item, current_highest_bid: bid, highest_bidder_id: user.id }
+              : item
+          )
+        );
       }
 
       await refreshProfile();
@@ -383,6 +446,8 @@ export function MarketplacePage() {
                   <AnimatePresence mode="popLayout">
                     {displayItems.map((item, index) => {
                       const seller = getUserById(item.user_id!);
+                      const isDummy = item.id?.startsWith('dummy-');
+                      const simulatedBidders = isDummy ? getSimulatedBidders(item.id!) : [];
                       const isNewListing = new Date(item.created_at!).getTime() > Date.now() - 24 * 60 * 60 * 1000;
                       const hasRecentBid = item.current_highest_bid && item.current_highest_bid > item.minimum_button_price!;
 
@@ -423,7 +488,7 @@ export function MarketplacePage() {
 
                           {/* Details */}
                           <div className="p-3">
-                            <p className="text-xs text-gray-500 mb-1">{item.category}</p>
+                            <p className="text-xs text-gray-500 mb-1">{CATEGORY_LABELS[normalizeCategoryId(item.category)]}</p>
                             <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
                               {item.title}
                             </h3>
@@ -451,6 +516,21 @@ export function MarketplacePage() {
                                 </div>
                               </div>
                             </div>
+                            {isDummy && simulatedBidders.length > 0 && (
+                              <div className="flex items-center justify-between mt-3">
+                                <div className="flex -space-x-2">
+                                  {simulatedBidders.slice(0, 4).map((bidder) => (
+                                    <div
+                                      key={bidder.id}
+                                      className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white text-[10px] font-semibold flex items-center justify-center border border-gray-900"
+                                    >
+                                      {bidder.avatar}
+                                    </div>
+                                  ))}
+                                </div>
+                                <span className="text-xs text-gray-500">Simulated bids</span>
+                              </div>
+                            )}
                           </div>
                         </motion.div>
                       );
@@ -483,7 +563,7 @@ export function MarketplacePage() {
               />
               <div className="flex-1">
                 <h3 className="font-semibold text-white mb-1">{selectedItem.title}</h3>
-                <p className="text-sm text-gray-400 mb-2">{selectedItem.category}</p>
+                <p className="text-sm text-gray-400 mb-2">{CATEGORY_LABELS[normalizeCategoryId(selectedItem.category)]}</p>
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                     {getUserById(selectedItem.user_id!).avatar}
