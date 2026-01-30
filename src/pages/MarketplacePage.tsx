@@ -292,7 +292,6 @@ export function MarketplacePage() {
       }
 
       await refreshProfile();
-      await loadMarketplace();
       setSelectedItem(null);
       setBidAmount('');
     } catch (err: any) {

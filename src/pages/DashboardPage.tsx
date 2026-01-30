@@ -18,6 +18,7 @@ export function DashboardPage() {
   const [myButtonBids, setMyButtonBids] = useState<ButtonResaleBid[]>([]);
   const [loading, setLoading] = useState(true);
   const activeButtonListings = myButtonListings.filter((listing) => listing.status === 'active');
+  const [highestBidByClothes, setHighestBidByClothes] = useState<Record<string, { amount: number; bidderId: string | null }>>({});
 
   useEffect(() => {
     loadDashboardData();
@@ -84,6 +85,25 @@ export function DashboardPage() {
           .in('id', clothesIds);
 
         if (biddedClothesData) setBiddedClothes(biddedClothesData);
+
+        const { data: activeClothingBids } = await supabase
+          .from('clothing_bids')
+          .select('clothes_id, amount, bidder_id')
+          .in('clothes_id', clothesIds)
+          .eq('status', 'active');
+
+        if (activeClothingBids) {
+          const highestMap: Record<string, { amount: number; bidderId: string | null }> = {};
+          activeClothingBids.forEach((bid) => {
+            const existing = highestMap[bid.clothes_id];
+            if (!existing || bid.amount > existing.amount) {
+              highestMap[bid.clothes_id] = { amount: bid.amount, bidderId: bid.bidder_id };
+            }
+          });
+          setHighestBidByClothes(highestMap);
+        }
+      } else {
+        setHighestBidByClothes({});
       }
     }
     if (buttonListingsRes.data) setMyButtonListings(buttonListingsRes.data);
@@ -217,7 +237,10 @@ export function DashboardPage() {
                 const item = biddedClothes.find(c => c.id === bid.clothes_id);
                 if (!item) return null;
 
-                const isWinning = item.highest_bidder_id === profile?.id;
+                const highestBid = highestBidByClothes[bid.clothes_id];
+                const highestAmount = highestBid?.amount ?? item.current_highest_bid ?? item.minimum_button_price;
+                const highestBidderId = highestBid?.bidderId ?? item.highest_bidder_id;
+                const isWinning = highestBidderId === profile?.id;
 
                 return (
                   <Card key={bid.id} hover onClick={() => navigate('/marketplace')}>
@@ -243,7 +266,7 @@ export function DashboardPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-gray-500">Highest</p>
-                          <p className="text-lg font-bold text-white">{item.current_highest_bid}</p>
+                          <p className="text-lg font-bold text-white">{highestAmount}</p>
                         </div>
                       </div>
                       <div className={`px-3 py-2 rounded-lg text-center text-sm font-medium ${
