@@ -9,6 +9,7 @@ import { Input } from '../components/Input';
 import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Coins, Users, Building2 } from 'lucide-react';
+import { generateDummyButtonListings, getUserById } from '../lib/dummyData';
 
 const PLATFORM_PACKAGES = [
   { amount: 50, price: 5, popular: false },
@@ -38,7 +39,10 @@ export function BuyButtonsPage() {
       .eq('status', 'active')
       .order('created_at', { ascending: false });
 
-    if (data) setUserListings(data.filter(l => l.seller_id !== user?.id));
+    // Combine with dummy data for demo purposes
+    const dummyListings = generateDummyButtonListings(12);
+    const combined = [...(data || []), ...dummyListings as ButtonResaleListing[]];
+    setUserListings(combined.filter(l => l.seller_id !== user?.id));
     setLoading(false);
   };
 
@@ -184,32 +188,44 @@ export function BuyButtonsPage() {
             </Card>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {userListings.map((listing) => (
-                <Card key={listing.id} hover>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-gray-400">Amount</p>
-                        <p className="text-2xl font-bold text-blue-400">{listing.button_amount}</p>
-                        <p className="text-xs text-gray-500">buttons</p>
+              {userListings.map((listing) => {
+                const seller = getUserById(listing.seller_id);
+                return (
+                  <Card key={listing.id} hover>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                          {seller.avatar}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-white">{seller.name}</p>
+                          <p className="text-xs text-gray-500">{seller.buttonBalance} buttons</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-400">Current Bid</p>
-                        <p className="text-2xl font-bold text-green-400">
-                          ${listing.current_highest_bid_usd || listing.minimum_price_usd}
-                        </p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-400">Amount</p>
+                          <p className="text-2xl font-bold text-blue-400">{listing.button_amount}</p>
+                          <p className="text-xs text-gray-500">buttons</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-400">Current Bid</p>
+                          <p className="text-2xl font-bold text-green-400">
+                            ${listing.current_highest_bid_usd || listing.minimum_price_usd}
+                          </p>
+                        </div>
                       </div>
+                      <Button
+                        onClick={() => setSelectedListing(listing)}
+                        className="w-full"
+                        disabled={listing.highest_bidder_id === user?.id}
+                      >
+                        {listing.highest_bidder_id === user?.id ? 'You\'re Winning' : 'Place Bid'}
+                      </Button>
                     </div>
-                    <Button
-                      onClick={() => setSelectedListing(listing)}
-                      className="w-full"
-                      disabled={listing.highest_bidder_id === user?.id}
-                    >
-                      {listing.highest_bidder_id === user?.id ? 'You\'re Winning' : 'Place Bid'}
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { HomePage } from './pages/HomePage';
 import { AuthPage } from './pages/AuthPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -54,6 +55,7 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<HomePage />} />
       <Route
         path="/auth"
         element={
@@ -114,7 +116,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
