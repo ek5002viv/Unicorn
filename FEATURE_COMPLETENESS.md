@@ -39,12 +39,50 @@
 - ✅ Quick action buttons
 
 ### UI/UX
-- ✅ Dark theme throughout
+- ✅ Strict 99Dresses color scheme applied (#2B2B2B bg, #4B2D4F header, #7A3B8F purple, #F5C542 gold)
+- ✅ White cards on dark background (99Dresses style)
 - ✅ Animated background component
 - ✅ Framer Motion page transitions
 - ✅ Responsive grid layouts
 - ✅ Professional card-based UI
 - ✅ High-contrast, readable typography
+- ✅ Hover states on all cards
+- ✅ Smooth transitions between pages
+
+### Recent Activity (NEW - MVP Critical)
+- ✅ Timeline-style layout showing marketplace activity
+- ✅ Recent bids with usernames and timestamps
+- ✅ Recent listings
+- ✅ Recent button purchases/sales
+- ✅ Relative timestamps ("5 min ago", "2 hrs ago")
+- ✅ Icons for different activity types
+- ✅ Clickable entries (navigation ready)
+- ✅ Integrated into dashboard quick actions
+
+### Image Upload (NEW)
+- ✅ Dropbox-style drag & drop interface
+- ✅ Multiple image upload support (up to 5 images)
+- ✅ Image preview before submission
+- ✅ Hover animations on drop zone
+- ✅ Toggle between upload and URL input
+- ✅ Visual feedback during drag operations
+- ✅ Remove individual images functionality
+- ✅ Integrated into ListClothingPage
+
+### Active Bids Display (NEW - Critical Feature)
+- ✅ Dedicated Active Bids section on dashboard
+- ✅ Shows item image, name, category
+- ✅ Displays user's bid vs highest bid
+- ✅ Visual indicator for winning vs outbid status
+- ✅ Clear highlight for user-leading bids
+- ✅ Grid layout for multiple active bids
+- ✅ Responsive design
+
+### Dummy Data Improvements
+- ✅ All items now dress-focused (15 dress types)
+- ✅ Updated to use dress-specific images from Pexels
+- ✅ Brands and items aligned with dress marketplace theme
+- ✅ Fashion-focused image URLs
 
 ## ⚠️ Incomplete / Mock Features
 

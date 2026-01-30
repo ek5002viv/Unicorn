@@ -9,6 +9,7 @@ import { MarketplacePage } from './pages/MarketplacePage';
 import { ListClothingPage } from './pages/ListClothingPage';
 import { BuyButtonsPage } from './pages/BuyButtonsPage';
 import { SellButtonsPage } from './pages/SellButtonsPage';
+import { RecentActivityPage } from './pages/RecentActivityPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -113,6 +114,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <SellButtonsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/activity"
+        element={
+          <ProtectedRoute>
+            <RecentActivityPage />
           </ProtectedRoute>
         }
       />

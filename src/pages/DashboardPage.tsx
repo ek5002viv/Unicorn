@@ -6,7 +6,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
-import { Coins, ShoppingBag, Upload, TrendingUp, LogOut } from 'lucide-react';
+import { Coins, ShoppingBag, Upload, TrendingUp, LogOut, Activity } from 'lucide-react';
 
 export function DashboardPage() {
   const { profile, signOut, refreshProfile } = useAuth();
@@ -119,7 +119,7 @@ export function DashboardPage() {
           </Card>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Button onClick={() => navigate('/marketplace')} className="h-20">
             <ShoppingBag className="mr-2" />
             Browse Marketplace
@@ -136,7 +136,67 @@ export function DashboardPage() {
             <TrendingUp className="mr-2" />
             Sell Buttons
           </Button>
+          <Button onClick={() => navigate('/activity')} variant="secondary" className="h-20">
+            <Activity className="mr-2" />
+            Recent Activity
+          </Button>
         </div>
+
+        {/* Active Bids Section */}
+        {myBids.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-white">Active Bids</h2>
+              <span className="text-sm text-gray-400">{myBids.length} bid{myBids.length !== 1 ? 's' : ''} active</span>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {myBids.map((bid) => {
+                const item = myClothes.find(c => c.id === bid.clothes_id);
+                if (!item) return null;
+
+                const isWinning = item.highest_bidder_id === profile?.id;
+
+                return (
+                  <Card key={bid.id} hover>
+                    <div className="space-y-3">
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.title}
+                          className="w-full h-40 object-cover rounded-lg"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Image';
+                          }}
+                        />
+                      )}
+                      <div>
+                        <h3 className="font-semibold text-white">{item.title}</h3>
+                        <p className="text-sm text-gray-400">{item.category}</p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-gray-500">Your Bid</p>
+                          <p className="text-lg font-bold" style={{ color: '#F5C542' }}>{bid.amount}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">Highest</p>
+                          <p className="text-lg font-bold text-white">{item.current_highest_bid}</p>
+                        </div>
+                      </div>
+                      <div className={`px-3 py-2 rounded-lg text-center text-sm font-medium ${
+                        isWinning
+                          ? 'bg-green-600/20 text-green-400'
+                          : 'bg-red-600/20 text-red-400'
+                      }`}>
+                        {isWinning ? '🎉 You\'re Winning!' : '⚠️ Outbid'}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-8">
           <div>

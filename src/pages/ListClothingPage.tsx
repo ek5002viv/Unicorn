@@ -6,6 +6,7 @@ import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { Background } from '../components/Background';
+import { ImageUpload } from '../components/ImageUpload';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
@@ -25,6 +26,8 @@ export function ListClothingPage() {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [imageUrl, setImageUrl] = useState('');
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [useUpload, setUseUpload] = useState(true);
   const [minimumPrice, setMinimumPrice] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,6 +38,14 @@ export function ListClothingPage() {
     setLoading(true);
 
     try {
+      const finalImageUrl = useUpload
+        ? (uploadedImages[0] || '')
+        : imageUrl;
+
+      if (!finalImageUrl) {
+        throw new Error('Please provide at least one image');
+      }
+
       const biddingEndsAt = new Date();
       biddingEndsAt.setDate(biddingEndsAt.getDate() + 7);
 
@@ -42,7 +53,7 @@ export function ListClothingPage() {
         user_id: user?.id,
         title,
         category,
-        image_url: imageUrl,
+        image_url: finalImageUrl,
         minimum_button_price: parseInt(minimumPrice),
         bidding_ends_at: biddingEndsAt.toISOString(),
         status: 'active',
@@ -102,27 +113,60 @@ export function ListClothingPage() {
               </select>
             </div>
 
-            <Input
-              label="Image URL"
-              placeholder="https://example.com/image.jpg"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              required
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-3">
+                Item Images
+              </label>
 
-            {imageUrl && (
-              <div className="border border-gray-700 rounded-lg p-4">
-                <p className="text-sm text-gray-400 mb-2">Preview:</p>
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  className="w-full h-64 object-cover rounded-lg"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Invalid+Image+URL';
-                  }}
-                />
+              <div className="flex gap-2 mb-4">
+                <Button
+                  type="button"
+                  variant={useUpload ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setUseUpload(true)}
+                >
+                  Upload Images
+                </Button>
+                <Button
+                  type="button"
+                  variant={!useUpload ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setUseUpload(false)}
+                >
+                  Use URL
+                </Button>
               </div>
-            )}
+
+              {useUpload ? (
+                <ImageUpload
+                  onImagesChange={setUploadedImages}
+                  maxImages={5}
+                  existingImages={uploadedImages}
+                />
+              ) : (
+                <>
+                  <Input
+                    placeholder="https://example.com/image.jpg"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                  />
+
+                  {imageUrl && (
+                    <div className="mt-4 border border-gray-700 rounded-lg p-4">
+                      <p className="text-sm text-gray-400 mb-2">Preview:</p>
+                      <img
+                        src={imageUrl}
+                        alt="Preview"
+                        className="w-full h-64 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Invalid+Image+URL';
+                        }}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
 
             <Input
               label="Minimum Button Price"
