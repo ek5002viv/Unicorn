@@ -6,6 +6,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
 import { Input } from '../components/Input';
+import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Coins, Users, Building2 } from 'lucide-react';
 
@@ -117,8 +118,9 @@ export function BuyButtonsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 relative">
+      <Background />
+      <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

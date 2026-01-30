@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase, Clothes, ClothingBid, ButtonResaleListing } from '../lib/supabase';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
 import { Coins, ShoppingBag, Upload, TrendingUp, LogOut } from 'lucide-react';
 
@@ -43,15 +44,17 @@ export function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center relative">
+        <Background />
+        <div className="text-white relative z-10">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 relative">
+      <Background />
+      <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex items-center justify-between mb-8">
           <motion.h1
             initial={{ opacity: 0, x: -20 }}

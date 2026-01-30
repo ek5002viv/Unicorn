@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
+import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
 import { Shirt } from 'lucide-react';
 
@@ -35,8 +36,9 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      <Background />
+      <div className="w-full max-w-md relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

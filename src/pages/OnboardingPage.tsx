@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
 import { Upload, ShoppingBag } from 'lucide-react';
 
@@ -18,8 +19,9 @@ export function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      <Background />
+      <div className="w-full max-w-2xl relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

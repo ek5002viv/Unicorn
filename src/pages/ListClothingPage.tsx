@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
+import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
@@ -58,8 +59,9 @@ export function ListClothingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen p-4 relative">
+      <Background />
+      <div className="max-w-2xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
