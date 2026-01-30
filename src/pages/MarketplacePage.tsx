@@ -14,14 +14,14 @@ import {
   getUserById,
   getItemsByStatus
 } from '../lib/dummyData';
+import { deductButtons, refundButtons } from '../lib/buttonService';
 
 const CATEGORIES = [
-  { id: 'all', name: 'All Items', icon: '👗' },
+  { id: 'all', name: 'All Dresses', icon: '👗' },
+  { id: 'dresses', name: 'Dresses', icon: '👗' },
   { id: 'tops', name: 'Tops', icon: '👚' },
   { id: 'bottoms', name: 'Bottoms', icon: '👖' },
-  { id: 'dresses', name: 'Dresses', icon: '👗' },
   { id: 'outerwear', name: 'Outerwear', icon: '🧥' },
-  { id: 'shoes', name: 'Shoes', icon: '👠' },
   { id: 'accessories', name: 'Accessories', icon: '👜' },
 ];
 
@@ -113,9 +113,10 @@ export function MarketplacePage() {
 
     try {
       const bid = parseInt(bidAmount);
+      const minBid = (selectedItem.current_highest_bid || selectedItem.minimum_button_price!) + 1;
 
-      if (bid < (selectedItem.current_highest_bid || selectedItem.minimum_button_price!)) {
-        throw new Error(`Bid must be at least ${selectedItem.current_highest_bid || selectedItem.minimum_button_price} buttons`);
+      if (bid < minBid) {
+        throw new Error(`Bid must be at least ${minBid} buttons`);
       }
 
       if (bid > profile.button_balance) {
@@ -123,22 +124,59 @@ export function MarketplacePage() {
       }
 
       // Only process if it's a real item (not dummy)
-      if (!selectedItem.id?.startsWith('dummy-')) {
-        await supabase.from('clothing_bids').insert({
-          clothes_id: selectedItem.id,
+      if (!selectedItem.id?.startsWith('dummy-') && selectedItem.id) {
+        const itemId = selectedItem.id;
+        const previousBidderId = selectedItem.highest_bidder_id;
+        const previousBidAmount = selectedItem.current_highest_bid || 0;
+
+        // Step 1: Deduct buttons from new bidder
+        const deductResult = await deductButtons(
+          user.id,
+          bid,
+          'spent_bid',
+          itemId,
+          `Bid ${bid} buttons on ${selectedItem.title}`
+        );
+
+        if (!deductResult.success) {
+          throw new Error(deductResult.error || 'Failed to deduct buttons');
+        }
+
+        // Step 2: Insert new bid
+        const { error: insertError } = await supabase.from('clothing_bids').insert({
+          clothes_id: itemId,
           bidder_id: user.id,
           amount: bid,
           status: 'active',
         });
 
-        if (selectedItem.highest_bidder_id) {
-          await supabase.from('clothing_bids')
-            .update({ status: 'outbid' })
-            .eq('clothes_id', selectedItem.id)
-            .eq('bidder_id', selectedItem.highest_bidder_id)
-            .eq('status', 'active');
+        if (insertError) {
+          await refundButtons(
+            user.id,
+            bid,
+            itemId,
+            `Refund for failed bid on ${selectedItem.title}`
+          );
+          throw insertError;
         }
 
+        // Step 3: Mark previous bid as outbid and refund previous bidder
+        if (previousBidderId && previousBidAmount > 0) {
+          await supabase.from('clothing_bids')
+            .update({ status: 'outbid' })
+            .eq('clothes_id', itemId)
+            .eq('bidder_id', previousBidderId)
+            .eq('status', 'active');
+
+          await refundButtons(
+            previousBidderId,
+            previousBidAmount,
+            itemId,
+            `Refund for being outbid on ${selectedItem.title}`
+          );
+        }
+
+        // Step 4: Update clothing item
         await supabase
           .from('clothes')
           .update({

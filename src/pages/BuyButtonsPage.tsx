@@ -10,6 +10,7 @@ import { Background } from '../components/Background';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Coins, Users, Building2 } from 'lucide-react';
 import { generateDummyButtonListings, getUserById } from '../lib/dummyData';
+import { grantButtons } from '../lib/buttonService';
 
 const PLATFORM_PACKAGES = [
   { amount: 50, price: 5, popular: false },
@@ -51,19 +52,17 @@ export function BuyButtonsPage() {
 
     setPurchasing(true);
     try {
-      await supabase.from('button_transactions').insert({
-        user_id: user.id,
-        amount: packageItem.amount,
-        transaction_type: 'purchase_platform',
-        description: `Purchased ${packageItem.amount} buttons for $${packageItem.price}`,
-      });
+      const result = await grantButtons(
+        user.id,
+        packageItem.amount,
+        'purchase_platform',
+        null,
+        `Purchased ${packageItem.amount} buttons for $${packageItem.price}`
+      );
 
-      await supabase
-        .from('user_profiles')
-        .update({
-          button_balance: (profile.button_balance || 0) + packageItem.amount,
-        })
-        .eq('id', user.id);
+      if (!result.success) {
+        throw new Error(result.error || 'Purchase failed');
+      }
 
       await refreshProfile();
       navigate('/dashboard');

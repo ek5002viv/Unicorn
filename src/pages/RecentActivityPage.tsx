@@ -1,72 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Background } from '../components/Background';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { motion } from 'framer-motion';
-import { ArrowLeft, TrendingUp, Upload, ShoppingBag, Coins, Clock } from 'lucide-react';
-import { getUserById } from '../lib/dummyData';
+import { ArrowLeft, TrendingUp, Upload, ShoppingBag, Coins, Clock, RefreshCcw } from 'lucide-react';
+import { supabase, ButtonTransaction } from '../lib/supabase';
 
-type ActivityType = 'bid' | 'listing' | 'button_purchase' | 'button_sale';
-
-interface Activity {
-  id: string;
-  type: ActivityType;
-  userId: string;
-  itemName?: string;
-  amount?: number;
-  timestamp: Date;
-  targetUserId?: string;
-}
-
-function generateRecentActivities(count: number = 20): Activity[] {
-  const activities: Activity[] = [];
+function getRelativeTime(dateString: string): string {
   const now = new Date();
-
-  const types: ActivityType[] = ['bid', 'listing', 'button_purchase', 'button_sale'];
-  const itemNames = [
-    'Floral Maxi Dress',
-    'Little Black Dress',
-    'Vintage Wrap Dress',
-    'Summer Midi Dress',
-    'Silk Slip Dress',
-    'Boho Sundress',
-    'Evening Gown',
-    'Casual Shift Dress',
-  ];
-
-  for (let i = 0; i < count; i++) {
-    const minutesAgo = Math.floor(Math.random() * 240) + 1; // 1-240 minutes ago
-    const timestamp = new Date(now.getTime() - minutesAgo * 60 * 1000);
-    const type = types[Math.floor(Math.random() * types.length)];
-
-    const activity: Activity = {
-      id: `activity-${i}`,
-      type,
-      userId: `user-${Math.floor(Math.random() * 8) + 1}`,
-      timestamp,
-    };
-
-    if (type === 'bid' || type === 'listing') {
-      activity.itemName = itemNames[Math.floor(Math.random() * itemNames.length)];
-      if (type === 'bid') {
-        activity.amount = Math.floor(Math.random() * 100) + 20;
-      }
-    } else {
-      activity.amount = Math.floor(Math.random() * 200) + 50;
-      if (type === 'button_purchase') {
-        activity.targetUserId = `user-${Math.floor(Math.random() * 8) + 1}`;
-      }
-    }
-
-    activities.push(activity);
-  }
-
-  return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-}
-
-function getRelativeTime(date: Date): string {
-  const now = new Date();
+  const date = new Date(dateString);
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
 
@@ -80,81 +23,88 @@ function getRelativeTime(date: Date): string {
   return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
 }
 
-function getActivityIcon(type: ActivityType) {
+function getActivityIcon(type: string) {
   switch (type) {
-    case 'bid':
+    case 'spent_bid':
       return TrendingUp;
-    case 'listing':
-      return Upload;
-    case 'button_purchase':
+    case 'purchase_platform':
+    case 'purchase_user':
       return ShoppingBag;
-    case 'button_sale':
+    case 'earned_sale':
+      return Coins;
+    case 'refund':
+      return RefreshCcw;
+    case 'initial_grant':
+      return Upload;
+    default:
       return Coins;
   }
 }
 
-function getActivityColor(type: ActivityType) {
+function getActivityColor(type: string) {
   switch (type) {
-    case 'bid':
-      return 'bg-brand-purple';
-    case 'listing':
-      return 'bg-green-600';
-    case 'button_purchase':
+    case 'spent_bid':
+      return 'bg-purple-600';
+    case 'purchase_platform':
+    case 'purchase_user':
       return 'bg-blue-600';
-    case 'button_sale':
-      return 'bg-brand-gold';
+    case 'earned_sale':
+      return 'bg-green-600';
+    case 'refund':
+      return 'bg-yellow-600';
+    case 'initial_grant':
+      return 'bg-teal-600';
+    default:
+      return 'bg-gray-600';
+  }
+}
+
+function getActivityTitle(transaction: ButtonTransaction): string {
+  switch (transaction.transaction_type) {
+    case 'spent_bid':
+      return 'Placed Bid';
+    case 'purchase_platform':
+      return 'Purchased Buttons';
+    case 'purchase_user':
+      return 'Purchased Buttons from User';
+    case 'earned_sale':
+      return 'Earned from Sale';
+    case 'refund':
+      return 'Refund Received';
+    case 'initial_grant':
+      return 'Initial Grant';
+    default:
+      return 'Transaction';
   }
 }
 
 export function RecentActivityPage() {
   const navigate = useNavigate();
-  const [activities] = useState(() => generateRecentActivities(25));
+  const [transactions, setTransactions] = useState<ButtonTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const getActivityDescription = (activity: Activity) => {
-    const actorUser = getUserById(activity.userId);
-    const targetUser = activity.targetUserId ? getUserById(activity.targetUserId) : null;
+  useEffect(() => {
+    loadActivities();
+  }, []);
 
-    switch (activity.type) {
-      case 'bid':
-        return (
-          <>
-            <span className="font-semibold text-white">{actorUser.name}</span>
-            {' '}bid{' '}
-            <span className="font-semibold text-brand-gold">{activity.amount} buttons</span>
-            {' '}on{' '}
-            <span className="font-semibold text-white">{activity.itemName}</span>
-          </>
-        );
-      case 'listing':
-        return (
-          <>
-            <span className="font-semibold text-white">{actorUser.name}</span>
-            {' '}listed{' '}
-            <span className="font-semibold text-white">{activity.itemName}</span>
-          </>
-        );
-      case 'button_purchase':
-        return (
-          <>
-            <span className="font-semibold text-white">{actorUser.name}</span>
-            {' '}purchased{' '}
-            <span className="font-semibold text-brand-gold">{activity.amount} buttons</span>
-            {targetUser && (
-              <>
-                {' '}from{' '}
-                <span className="font-semibold text-white">{targetUser.name}</span>
-              </>
-            )}
-          </>
-        );
-      case 'button_sale':
-        return (
-          <>
-            <span className="font-semibold text-white">{actorUser.name}</span>
-            {' '}sold{' '}
-            <span className="font-semibold text-brand-gold">{activity.amount} buttons</span>
-          </>
-        );
+  const loadActivities = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('button_transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+
+      if (data) {
+        setTransactions(data);
+      }
+    } catch (error) {
+      console.error('Failed to load activities:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -171,66 +121,94 @@ export function RecentActivityPage() {
               Back
             </Button>
             <h1 className="text-3xl font-bold text-white mb-2">Recent Activity</h1>
-            <p className="text-text-body">See what's happening in the marketplace</p>
+            <p className="text-text-body">All button transactions across the marketplace</p>
           </div>
         </div>
 
         {/* Activity Timeline */}
         <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="space-y-4">
-            {activities.map((activity, index) => {
-              const Icon = getActivityIcon(activity.type);
-              const colorClass = getActivityColor(activity.type);
-              const user = getUserById(activity.userId);
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-gray-400">Loading activities...</p>
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-gray-400">No activities yet</p>
+              <p className="text-sm text-gray-500 mt-2">Start bidding or listing items to see activity here</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {transactions.map((transaction, index) => {
+                const Icon = getActivityIcon(transaction.transaction_type);
+                const colorClass = getActivityColor(transaction.transaction_type);
+                const title = getActivityTitle(transaction);
+                const isPositive = transaction.amount > 0;
 
-              return (
-                <motion.div
-                  key={activity.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: Math.min(index * 0.03, 0.6) }}
-                >
-                  <Card
-                    hover
-                    className="cursor-pointer transition-all duration-200"
-                    style={{ backgroundColor: '#FFFFFF' }}
+                return (
+                  <motion.div
+                    key={transaction.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: Math.min(index * 0.02, 0.4) }}
                   >
-                    <div className="flex items-start gap-4">
-                      {/* Icon */}
-                      <div className={`flex-shrink-0 w-12 h-12 ${colorClass} rounded-full flex items-center justify-center`}>
-                        <Icon size={24} className="text-white" />
-                      </div>
+                    <Card
+                      hover
+                      className="cursor-pointer transition-all duration-200"
+                      style={{ backgroundColor: '#FFFFFF' }}
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Icon */}
+                        <div className={`flex-shrink-0 w-12 h-12 ${colorClass} rounded-full flex items-center justify-center`}>
+                          <Icon size={24} className="text-white" />
+                        </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-text-card text-base leading-relaxed mb-2">
-                          {getActivityDescription(activity)}
-                        </p>
-
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                              {user.avatar}
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <p className="text-text-card text-base font-semibold">
+                                {title}
+                              </p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {transaction.description}
+                              </p>
                             </div>
-                            <span>{user.name}</span>
+                            <div className={`text-right ml-4 ${
+                              isPositive ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              <p className="text-xl font-bold">
+                                {isPositive ? '+' : ''}{transaction.amount}
+                              </p>
+                              <p className="text-xs text-gray-500">buttons</p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock size={14} />
-                            <span>{getRelativeTime(activity.timestamp)}</span>
+
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <Clock size={14} />
+                              <span>{getRelativeTime(transaction.created_at)}</span>
+                            </div>
+                            <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                              {transaction.transaction_type.replace(/_/g, ' ')}
+                            </span>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Load More */}
-          <div className="mt-8 text-center">
-            <Button variant="secondary">Load More Activity</Button>
-          </div>
+          {transactions.length > 0 && (
+            <div className="mt-8 text-center">
+              <Button variant="secondary" onClick={loadActivities}>
+                Refresh Activity
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -13,6 +13,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const [myClothes, setMyClothes] = useState<Clothes[]>([]);
   const [myBids, setMyBids] = useState<ClothingBid[]>([]);
+  const [biddedClothes, setBiddedClothes] = useState<Clothes[]>([]);
   const [myButtonListings, setMyButtonListings] = useState<ButtonResaleListing[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +31,20 @@ export function DashboardPage() {
     ]);
 
     if (clothesRes.data) setMyClothes(clothesRes.data);
-    if (bidsRes.data) setMyBids(bidsRes.data);
+    if (bidsRes.data) {
+      setMyBids(bidsRes.data);
+
+      // Fetch the clothes items that user has bid on
+      const clothesIds = bidsRes.data.map(bid => bid.clothes_id);
+      if (clothesIds.length > 0) {
+        const { data: biddedClothesData } = await supabase
+          .from('clothes')
+          .select('*')
+          .in('id', clothesIds);
+
+        if (biddedClothesData) setBiddedClothes(biddedClothesData);
+      }
+    }
     if (buttonListingsRes.data) setMyButtonListings(buttonListingsRes.data);
 
     await refreshProfile();
@@ -151,13 +165,13 @@ export function DashboardPage() {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {myBids.map((bid) => {
-                const item = myClothes.find(c => c.id === bid.clothes_id);
+                const item = biddedClothes.find(c => c.id === bid.clothes_id);
                 if (!item) return null;
 
                 const isWinning = item.highest_bidder_id === profile?.id;
 
                 return (
-                  <Card key={bid.id} hover>
+                  <Card key={bid.id} hover onClick={() => navigate('/marketplace')}>
                     <div className="space-y-3">
                       {item.image_url && (
                         <img
